@@ -6,4 +6,7 @@
 > Still under heavy development
 
 ## Screenshots
-![](./docs/assets/home.jpg)![](./docs/assets/feed.jpg)
+
+| Home                        | Single Feed                 |
+| --------------------------- | --------------------------- |
+| ![](./docs/assets/home.jpg) | ![](./docs/assets/feed.jpg) |
