@@ -17,6 +17,7 @@ export type FeedItem = {
 export type Feed = {
   id: string;
   title: string;
+  feedUrl: string;
   link: string;
   items: FeedItem[];
   isLoading?: boolean;
@@ -34,11 +35,15 @@ type FeedState = {
 
 export const useFeedStore = create<FeedState>()(persist((set, get) => ({
   feeds: [],
-  addFeed: async (rss: string) => {
-    const rssString = await fetch(rss).then((d) => d.text());
+  addFeed: async (feedUrl: string) => {
+    const rssString = await fetch(feedUrl).then((d) => d.text());
     const feed = parseRSS(rssString);
     set((state) => ({
-      feeds: [...state.feeds, { ...feed, isLoading: false }] as Feed[],
+      feeds: [...state.feeds, {
+        ...feed,
+        feedUrl: feedUrl,
+        isLoading: false,
+      }] as Feed[],
     }));
   },
   removeFeed: (id: string) => {
@@ -71,9 +76,11 @@ export const useFeedStore = create<FeedState>()(persist((set, get) => ({
     set((s) => ({
       feeds: s.feeds.map((d) => ({ ...d, "isLoading": true })),
     }));
+
     const feeds = await Promise.all(
       get().feeds.map(async (d) => {
-        const response = await fetch(d.link).then((d) => d.text());
+        if (!d.feedUrl) return;
+        const response = await fetch(d.feedUrl).then((d) => d.text());
         const feed = parseRSS(response);
         const newItems = d.items.filter((x) =>
           !feed.items.some((y) => y.id === x.id)
@@ -81,6 +88,7 @@ export const useFeedStore = create<FeedState>()(persist((set, get) => ({
         return {
           ...feed,
           id: d.id,
+          feedUrl: d.feedUrl,
           isLoading: false,
           items: d.items.concat(newItems).sort(sortByPublished),
         };
@@ -94,7 +102,7 @@ export const useFeedStore = create<FeedState>()(persist((set, get) => ({
     const currentFeed = get().feeds.find((d) => d.id === id);
     if (!currentFeed) return;
 
-    const rssText = await fetch(currentFeed.link).then((d) => d.text());
+    const rssText = await fetch(currentFeed.feedUrl).then((d) => d.text());
     const feed = parseRSS(rssText);
 
     const updatedItems = feed.items
