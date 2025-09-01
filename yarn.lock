@@ -2535,6 +2535,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@rowanmanning/feed-parser@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "@rowanmanning/feed-parser@npm:2.1.1"
+  dependencies:
+    fast-xml-parser: "npm:^5.0.8"
+    html-entities: "npm:^2.3.3"
+  checksum: 10c0/a38e10da76bd141a66e9b5be9b5f7005bb7b25b038c1273cb4cee1db404884faa05f8dc0a19b42f1060565f050eb0125505dd5ce8b28f4dadfb973e1afb83aa5
+  languageName: node
+  linkType: hard
+
 "@sideway/address@npm:^4.1.5":
   version: 4.1.5
   resolution: "@sideway/address@npm:4.1.5"
@@ -4880,7 +4890,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-xml-parser@npm:^5.2.5":
+"fast-xml-parser@npm:^5.0.8, fast-xml-parser@npm:^5.2.5":
   version: 5.2.5
   resolution: "fast-xml-parser@npm:5.2.5"
   dependencies:
@@ -4942,6 +4952,7 @@ __metadata:
     "@react-navigation/native": "npm:^7.1.17"
     "@react-navigation/native-stack": "npm:^7.3.25"
     "@react-navigation/stack": "npm:^7.4.7"
+    "@rowanmanning/feed-parser": "npm:^2.1.1"
     "@types/jest": "npm:^29.5.13"
     "@types/react": "npm:^19.1.0"
     "@types/react-native-get-random-values": "npm:^1"
@@ -4954,6 +4965,8 @@ __metadata:
     mobx: "npm:^6.13.7"
     mobx-persist-store: "npm:^1.1.8"
     mobx-react-lite: "npm:^4.1.0"
+    mobx-state-tree: "npm:^7.0.2"
+    mobx-utils: "npm:^6.1.1"
     nanoid: "npm:^5.1.5"
     prettier: "npm:2.8.8"
     react: "npm:19.1.0"
@@ -4968,6 +4981,8 @@ __metadata:
     react-native-xml2js: "npm:^1.0.3"
     react-test-renderer: "npm:19.1.0"
     typescript: "npm:^5.8.3"
+    wonka: "npm:^6.3.5"
+    xstream: "npm:^11.14.0"
     zustand: "npm:^5.0.8"
   languageName: unknown
   linkType: soft
@@ -5292,7 +5307,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globalthis@npm:^1.0.4":
+"globalthis@npm:^1.0.1, globalthis@npm:^1.0.4":
   version: 1.0.4
   resolution: "globalthis@npm:1.0.4"
   dependencies:
@@ -5416,6 +5431,13 @@ __metadata:
   dependencies:
     react-is: "npm:^16.7.0"
   checksum: 10c0/fe0889169e845d738b59b64badf5e55fa3cf20454f9203d1eb088df322d49d4318df774828e789898dcb280e8a5521bb59b3203385662ca5e9218a6ca5820e74
+  languageName: node
+  linkType: hard
+
+"html-entities@npm:^2.3.3":
+  version: 2.6.0
+  resolution: "html-entities@npm:2.6.0"
+  checksum: 10c0/7c8b15d9ea0cd00dc9279f61bab002ba6ca8a7a0f3c36ed2db3530a67a9621c017830d1d2c1c65beb9b8e3436ea663e9cf8b230472e0e413359399413b27c8b7
   languageName: node
   linkType: hard
 
@@ -7295,6 +7317,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mobx-state-tree@npm:^7.0.2":
+  version: 7.0.2
+  resolution: "mobx-state-tree@npm:7.0.2"
+  dependencies:
+    ts-essentials: "npm:^9.4.1"
+  peerDependencies:
+    mobx: ^6.3.0
+  checksum: 10c0/3a4c22b8ccdace789451593573a962fa26c4f5405ec9b8c3ba613cae82cfa3adbbbace1e61df2bee28ced72a53c417e9292f134466f99841548bca97bd43a547
+  languageName: node
+  linkType: hard
+
+"mobx-utils@npm:^6.1.1":
+  version: 6.1.1
+  resolution: "mobx-utils@npm:6.1.1"
+  peerDependencies:
+    mobx: ^6.0.0
+  checksum: 10c0/85de1f4b4b7854db6a27d28211a507bf937e9c25f0052eb913fed344c69f6b293153bb658971c0b8495d9a23571770215232e1df22ed54cae6b79e08bfab12a2
+  languageName: node
+  linkType: hard
+
 "mobx@npm:^6.13.7":
   version: 6.13.7
   resolution: "mobx@npm:6.13.7"
@@ -9106,6 +9148,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"symbol-observable@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "symbol-observable@npm:2.0.3"
+  checksum: 10c0/03fb8766b75bfa65a3c7d68ae1e51a13a5ff71b40d6d53b17a0c9c77b1685c20a3bfbf45547ab36214a079665c3f551e250798f6b2f83a2a40762d864ed87f78
+  languageName: node
+  linkType: hard
+
 "tar@npm:^7.4.3":
   version: 7.4.3
   resolution: "tar@npm:7.4.3"
@@ -9205,6 +9254,18 @@ __metadata:
   peerDependencies:
     typescript: ">=4.2.0"
   checksum: 10c0/e65dc6e7e8141140c23e1dc94984bf995d4f6801919c71d6dc27cf0cd51b100a91ffcfe5217626193e5bea9d46831e8586febdc7e172df3f1091a7384299e23a
+  languageName: node
+  linkType: hard
+
+"ts-essentials@npm:^9.4.1":
+  version: 9.4.2
+  resolution: "ts-essentials@npm:9.4.2"
+  peerDependencies:
+    typescript: ">=4.1.0"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10c0/125d79a0fc4fbfcfbc6f6461e05cde1f9da46035867ae3164812e615d6cc02cd0b2f470c944f619e87f89bebb00b81eb5c9558e83cf6e8e0f47be184474f855e
   languageName: node
   linkType: hard
 
@@ -9644,6 +9705,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"wonka@npm:^6.3.5":
+  version: 6.3.5
+  resolution: "wonka@npm:6.3.5"
+  checksum: 10c0/044fe5ae26c0a32b0a1603cc0ed71ede8c9febe5bb3adab4fad5e088ceee600a84a08d0deb95a72189bbaf0d510282d183b6fb7b6e9837e7a1c9b209f788dd07
+  languageName: node
+  linkType: hard
+
 "word-wrap@npm:^1.2.5":
   version: 1.2.5
   resolution: "word-wrap@npm:1.2.5"
@@ -9736,6 +9804,16 @@ __metadata:
   version: 15.1.1
   resolution: "xmlbuilder@npm:15.1.1"
   checksum: 10c0/665266a8916498ff8d82b3d46d3993913477a254b98149ff7cff060d9b7cc0db7cf5a3dae99aed92355254a808c0e2e3ec74ad1b04aa1061bdb8dfbea26c18b8
+  languageName: node
+  linkType: hard
+
+"xstream@npm:^11.14.0":
+  version: 11.14.0
+  resolution: "xstream@npm:11.14.0"
+  dependencies:
+    globalthis: "npm:^1.0.1"
+    symbol-observable: "npm:^2.0.3"
+  checksum: 10c0/7a28baedc64385dc17597d04c7130ec3135db298e66d6dcf33821eb1953d5ad1b83c5fa08f1ce4d36e75fd219f2e9ef81ee0721aa8d4ccf619acc1760ba37f71
   languageName: node
   linkType: hard
 

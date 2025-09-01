@@ -1,14 +1,24 @@
+import Icon from "@react-native-vector-icons/material-design-icons";
 import {
+  createStaticNavigation,
   DefaultTheme,
-  NavigationContainer,
   Route,
   useNavigation,
 } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { XMLParser } from "fast-xml-parser";
-import { observer } from "mobx-react-lite";
-import { isHydrated, makePersistable } from "mobx-persist-store";
+import { useEffect, useState } from "react";
+import {
+  Animated,
+  FlatList,
+  Linking,
+  StatusBar,
+  StyleProp,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+  View,
+} from "react-native";
+import "react-native-get-random-values";
 import {
   adaptNavigationTheme,
   Appbar,
@@ -25,151 +35,16 @@ import {
   TouchableRipple,
   useTheme,
 } from "react-native-paper";
+import { useFeedStore } from "./lib/reactive";
 
-import Icon from "@react-native-vector-icons/material-design-icons";
-import { action, makeAutoObservable, observable } from "mobx";
-import { useEffect, useState } from "react";
-import {
-  Animated,
-  FlatList,
-  Linking,
-  StatusBar,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from "react-native";
-
-let feedIdCounter = 0;
-class FeedItem {
-  title: string;
-  link = "";
-  unread = true;
-  constructor(title: string, link?: string) {
-    this.title = title;
-    if (link) this.link = link;
-    makeAutoObservable(this);
-  }
-
-  toggleRead(bool: boolean) {
-    this.unread = bool;
-  }
-}
-
-class FeedCollection {
-  collection: Feed[] = [];
-
-  constructor() {
-    makeAutoObservable(this);
-    makePersistable(this, {
-      name: "FeedCollection",
-      properties: ["collection"],
-      stringify: true,
-      storage: AsyncStorage,
-    }, { delay: 200, fireImmediately: false }).then(action((store) => {
-      if (store.isHydrated) {
-        this.cleanUp();
-      }
-    }));
-  }
-
-  get isHydrated() {
-    return isHydrated(this);
-  }
-
-  add(url: string) {
-    if (this.collection.some((d) => d.url === url)) return;
-    const feed = new Feed(url);
-    this.collection.push(feed);
-    return feed.id;
-  }
-
-  sync(id: number) {
-    const f = this.collection.find((d) => d.id === id);
-    if (!f) return;
-    return f.sync();
-  }
-
-  cleanUp() {
-    const set = new Set<string>();
-    this.collection.forEach((d) => {
-      if (d.url) set.add(d.url);
-    });
-    this.collection = [];
-    [...set.entries()].forEach((d) => this.add(d[0]));
-  }
-}
-
-class Feed {
-  id: number;
-  url: string = "";
-  title: string = "";
-  items: FeedItem[] = [];
-  state: "loading" | "idle" = "idle";
-
-  constructor(url: string) {
-    this.id = ++feedIdCounter;
-    this.url = url;
-    this.title = url;
-    makeAutoObservable(this, {
-      sync: action,
-      items: observable,
-      title: observable,
-    });
-  }
-
-  get unread() {
-    return this.items.reduce((acc, i) => {
-      return acc + (i.unread ? 1 : 0);
-    }, 0);
-  }
-
-  setLoading(bool: boolean) {
-    this.state = bool ? "loading" : "idle";
-  }
-  updateTitle(title: string) {
-    this.title = title;
-  }
-  updateItems(items: FeedItem[]) {
-    this.items = items;
-  }
-
-  async sync() {
-    try {
-      this.setLoading(true);
-
-      const response = await fetch(this.url).then((d) => d.text());
-      const feed = parseRSS(response);
-      this.updateTitle(feed.title || this.url);
-      this.title = feed.title || this.url;
-      const items = feed.items.sort((y, x) =>
-        new Date(x.published).getTime() - new Date(y.published).getTime()
-      ).map((d) => {
-        const link = d.link;
-        return new FeedItem(
-          d.title,
-          link || "",
-        );
-      });
-      this.updateItems(items);
-    } catch (err) {
-      console.error(err);
-      throw err;
-    } finally {
-      this.setLoading(false);
-    }
-  }
-}
-
-const feedColl = new FeedCollection();
-
-if (feedColl.isHydrated) {
-  feedColl.cleanUp();
-}
-
-const FeedList = observer(({ feedColl }: { feedColl: FeedCollection }) => {
+const FeedList = () => {
   const navigation = useNavigation();
   const theme = useTheme();
   const [rotateAnim] = useState(() => new Animated.Value(0));
+  const [selected, setSelected] = useState<string[]>([]);
+  const [multiSelect, setMultiSelect] = useState(false);
+  const feeds = useFeedStore((state) => state.feeds);
+  const removeFeed = useFeedStore((state) => state.removeFeed);
 
   useEffect(() => {
     Animated.loop(
@@ -185,117 +60,157 @@ const FeedList = observer(({ feedColl }: { feedColl: FeedCollection }) => {
     inputRange: [0, 1],
     outputRange: ["0deg", "360deg"],
   });
-  return feedColl.collection.map((feed) => {
-    return (
-      <TouchableRipple
-        onPress={() => {
-          navigation.navigate("Feed", { id: feed.id });
-        }}
-      >
-        <List.Item
-          key={feed.url}
-          title={feed.title}
-          right={(props) => {
-            return (
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                {feed.state === "loading"
-                  ? (
-                    <Animated.View
-                      style={{
-                        transform: [{ rotate: rotation }],
-                      }}
-                    >
-                      <Icon color={theme.colors.primary} name="loading" />
-                    </Animated.View>
-                  )
-                  : (
-                    <Badge>
-                      {feed.unread}
-                    </Badge>
-                  )}
-                <List.Icon {...props} icon="arrow-right" />
-              </View>
-            );
-          }}
-        />
-      </TouchableRipple>
+
+  const syncAll = useFeedStore((state) => state.syncAll);
+
+  const handleSelect = (id: string) => {
+    if (!multiSelect) {
+      navigation.navigate({
+        name: "Feed",
+        params: { id },
+      });
+      return;
+    }
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
-  });
-});
+  };
 
-const FeedItemList = observer(({ feed }: { feed?: Feed }) => {
-  const theme = useTheme();
-
-  useEffect(() => {
-    if (feed) feed.sync();
-  }, []);
-
-  if (!feed) return <></>;
-
-  const isFeedLoading = feed.state === "loading";
-
-  return (
-    <FlatList
-      refreshing={isFeedLoading}
-      data={feed.items}
-      onRefresh={() => feed.sync()}
-      ListEmptyComponent={!isFeedLoading ? <Text>No Items</Text> : <></>}
-      renderItem={({ item }) => {
-        return (
-          <TouchableOpacity
-            onPress={() => {
-              if (!item.link.trim()) {
-                return;
-              }
-              if (!Linking.canOpenURL(item.link)) {
-                return;
-              }
-              return Linking.openURL(item.link);
-            }}
-          >
-            <List.Item
-              left={({ style }) => (
-                <View
-                  style={{
-                    ...style,
-                    height: 12,
-                    width: 12,
-                    backgroundColor: theme.colors.primary,
-                    borderRadius: 1000,
-                  }}
-                />
-              )}
-              title={item.title}
-            />
-          </TouchableOpacity>
-        );
-      }}
-    />
-  );
-});
-
-const HomePage = () => {
   return (
     <>
-      <View>
-        <Appbar.Header>
-          <Appbar.Content title="FeedIt" />
-        </Appbar.Header>
-        <FeedList feedColl={feedColl} />
-      </View>
-      <AddFeedFAB feedColl={feedColl} />
+      <Appbar.Header>
+        <Appbar.Content
+          title={multiSelect ? `${selected.length} selected` : "FeedIt"}
+        />
+        <Appbar.Action
+          icon="refresh"
+          onPress={() => {
+            syncAll();
+          }}
+        />
+        {multiSelect && selected.length > 0 && (
+          <Appbar.Action
+            icon="delete"
+            onPress={() => {
+              selected.forEach((id) => removeFeed(id));
+              setSelected([]);
+              setMultiSelect(false);
+            }}
+          />
+        )}
+        <Appbar.Action
+          icon={multiSelect ? "close" : "checkbox-multiple-marked"}
+          onPress={() => {
+            setMultiSelect((v) => !v);
+            if (multiSelect) setSelected([]);
+          }}
+        />
+      </Appbar.Header>
+      {feeds.map((feed) => {
+        const isSelected = selected.includes(feed.id);
+        return (
+          <TouchableRipple
+            key={`feed-${feed.id}`}
+            onPress={() => handleSelect(feed.id)}
+            onLongPress={() => {
+              setMultiSelect(true);
+              setSelected([feed.id]);
+            }}
+            style={isSelected
+              ? [{
+                backgroundColor: theme.colors.onBackground,
+              }]
+              : null}
+          >
+            <List.Item
+              title={feed.title}
+              titleStyle={{
+                color: isSelected
+                  ? theme.colors.background
+                  : theme.colors.onBackground,
+              }}
+              left={multiSelect
+                ? ((props) => (
+                  <FeedSelectIcon {...props} selected={isSelected} />
+                ))
+                : undefined}
+              right={(props) => (
+                <FeedRightIcons
+                  {...props}
+                  feed={feed}
+                  multiSelect={multiSelect}
+                  rotation={rotation}
+                  theme={theme}
+                />
+              )}
+            />
+          </TouchableRipple>
+        );
+      })}
     </>
   );
 };
 
-const AddFeedFAB = ({ feedColl }: { feedColl: FeedCollection }) => {
+const FeedItemList = ({ feedId }: { feedId: string }) => {
+  const theme = useTheme();
+  const feed = useFeedStore((state) =>
+    state.feeds.find((f) => f.id === feedId)
+  );
+  const markItemUnread = useFeedStore((state) => state.markItemUnread);
+  const syncFeed = useFeedStore((state) => state.syncFeed);
+  if (!feed) return <></>;
+  const isFeedLoading = feed.isLoading;
+  return (
+    <FlatList
+      refreshing={isFeedLoading}
+      data={feed.items}
+      onRefresh={() => {
+        syncFeed(feedId);
+      }}
+      ListEmptyComponent={!isFeedLoading ? <Text>No Items</Text> : <></>}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          onPress={() => {
+            if (!item.link.trim()) return;
+            markItemUnread(feed.id, item.id, false);
+            Linking.canOpenURL(item.link).then((canOpen) => {
+              if (!canOpen) return;
+              Linking.openURL(item.link);
+            });
+          }}
+        >
+          <List.Item
+            left={(props) => (
+              <FeedUnreadDot
+                style={props.style}
+                unread={item.unread}
+                theme={theme}
+              />
+            )}
+            title={item.title}
+          />
+        </TouchableOpacity>
+      )}
+    />
+  );
+};
+
+const HomePage = () => {
+  return (
+    <>
+      <FeedList />
+      <AddFeedFAB />
+    </>
+  );
+};
+
+const AddFeedFAB = () => {
   const [url, setUrl] = useState("");
   const [visible, setVisible] = useState(false);
   const theme = useTheme();
-
+  const addFeed = useFeedStore((state) => state.addFeed);
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
-
   return (
     <>
       <Portal>
@@ -303,9 +218,11 @@ const AddFeedFAB = ({ feedColl }: { feedColl: FeedCollection }) => {
           visible={visible}
           onDismiss={hideModal}
         >
-          <Card style={{ backgroundColor: theme.colors.surface, margin: 10 }}>
+          <Card
+            style={[styles.card, { backgroundColor: theme.colors.surface }]}
+          >
             <Card.Title
-              titleStyle={{ fontSize: 16, fontWeight: 600 }}
+              titleStyle={styles.cardTitle}
               title={"Add Feed"}
             />
             <Card.Content>
@@ -317,11 +234,13 @@ const AddFeedFAB = ({ feedColl }: { feedColl: FeedCollection }) => {
                 onChangeText={setUrl}
               />
             </Card.Content>
-            <Card.Actions style={{ marginTop: 10 }}>
+            <Card.Actions style={styles.cardActions}>
               <Button onPress={() => hideModal()}>Cancel</Button>
               <Button
                 onPress={() => {
-                  feedColl.sync(feedColl.add(url));
+                  if (url.trim()) {
+                    addFeed(url);
+                  }
                   setUrl("");
                   hideModal();
                 }}
@@ -334,7 +253,7 @@ const AddFeedFAB = ({ feedColl }: { feedColl: FeedCollection }) => {
       </Portal>
       <FAB
         icon="plus"
-        style={{ position: "absolute", margin: 16, right: 0, bottom: 0 }}
+        style={styles.fab}
         onPress={() => showModal()}
       />
     </>
@@ -342,29 +261,43 @@ const AddFeedFAB = ({ feedColl }: { feedColl: FeedCollection }) => {
 };
 
 const FeedPage = (
-  { route }: { route: Route<"Feed" | "Home", { id: number }> },
+  { route }:
+    & { route: Route<"Feed" | "Home", { id: string }> }
+    & Record<any, unknown>,
 ) => {
   const params = route.params;
-  const feed = feedColl.collection.find((d) => d.id === params.id);
-
   const navigation = useNavigation();
-
+  const feed = useFeedStore((state) =>
+    state.feeds.find((f) => f.id === params.id)
+  );
+  if (!feed) return <Text>Not found</Text>;
   return (
     <View>
       <Appbar.Header>
         <Appbar.BackAction
           onPress={() => {
-            return navigation.navigate("Home");
+            navigation.navigate({ name: "Home" });
           }}
         />
         <Appbar.Content title={feed?.title} />
       </Appbar.Header>
-      <FeedItemList feed={feed} />
+      <FeedItemList feedId={params.id} />
     </View>
   );
 };
 
-const RootStack = createNativeStackNavigator();
+const RootStack = createNativeStackNavigator({
+  initialRouteName: "Home",
+  screens: {
+    Home: HomePage,
+    "Feed": FeedPage,
+  },
+  screenOptions: {
+    headerShown: false,
+  },
+});
+
+const Navigation = createStaticNavigation(RootStack);
 
 const { LightTheme, DarkTheme } = adaptNavigationTheme({
   reactNavigationDark: DefaultTheme,
@@ -377,66 +310,75 @@ const App = () => {
   return (
     <PaperProvider>
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
-      <NavigationContainer theme={isDarkMode ? DarkTheme : LightTheme}>
-        <RootStack.Navigator>
-          <RootStack.Screen
-            options={{ headerShown: false }}
-            name="Home"
-            component={HomePage}
-          />
-          <RootStack.Screen
-            options={{ headerShown: false }}
-            name="Feed"
-            component={FeedPage}
-          />
-        </RootStack.Navigator>
-      </NavigationContainer>
+      <Navigation theme={isDarkMode ? DarkTheme : LightTheme} />
     </PaperProvider>
   );
 };
 
-// feedColl.add("https://manuelmoreale.com/feed/rss");
-// feedColl.collection.forEach((d) => d.sync());
+// Helper components and styles
 
-function parseRSS(str: string) {
-  const parser = new XMLParser();
-  const feed = parser.parse(str);
+const FeedSelectIcon = (props: any) => (
+  <List.Icon
+    {...props}
+    icon={props.selected ? "check-circle" : "circle-outline"}
+  />
+);
 
-  const feedSource = (() => {
-    if ("rss" in feed) {
-      return feed.rss.channel;
-    }
-    if ("feed" in feed) {
-      return feed.feed;
-    }
-  })();
+const FeedRightIcons = (
+  { feed, multiSelect, rotation, theme, ...props }: any,
+) => (
+  <View style={styles.rowCenter}>
+    {feed.isLoading
+      ? (
+        <Animated.View style={{ transform: [{ rotate: rotation }] }}>
+          <Icon color={theme.colors.primary} name="loading" />
+        </Animated.View>
+      )
+      : <Badge>{feed.items.filter((i: any) => i.unread).length}</Badge>}
+    {!multiSelect && <List.Icon {...props} icon="arrow-right" />}
+  </View>
+);
 
-  const feedEntries = Array.isArray(feedSource.item)
-    ? feedSource.item
-    : Array.isArray(feedSource.entry)
-    ? feedSource.entry
-    : [];
+const FeedUnreadDot = (
+  { unread, theme, style }: {
+    style: StyleProp<any>;
+    unread: boolean;
+    theme: any;
+  },
+) => (
+  <View
+    style={[style, styles.unreadDot, {
+      backgroundColor: unread ? theme.colors.primary : theme.colors.surface,
+    }]}
+  />
+);
 
-  return {
-    title: feedSource.title,
-    link: feedSource.link || feedSource.id,
-    items: feedEntries.map((d) => {
-      const link = extractLink(d, feedSource.link);
-      return {
-        id: d.guid || d.id,
-        link: link,
-        published: d.pubDate,
-        title: d.title,
-      };
-    }),
-  };
-}
-
-function extractLink(item, base) {
-  if ("link" in item) {
-    return item.link;
-  }
-  return new URL(item.guid, base).href;
-}
+const styles = StyleSheet.create({
+  rowCenter: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  unreadDot: {
+    height: 12,
+    width: 12,
+    borderRadius: 1000,
+  },
+  card: {
+    margin: 10,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  cardActions: {
+    marginTop: 10,
+  },
+  fab: {
+    position: "absolute",
+    margin: 16,
+    right: 0,
+    bottom: 0,
+  },
+});
 
 export default App;

@@ -19,7 +19,7 @@ cd android
 # Output APK path
 APK_PATH="app/build/outputs/apk/release/app-release.apk"
 if [ -f "$APK_PATH" ]; then
-  echo "\nAPK generated: $APK_PATH"
+  echo "\nAPK generated: android/$APK_PATH"
 else
   echo "\nAPK build failed. Check for errors above."
   exit 1
