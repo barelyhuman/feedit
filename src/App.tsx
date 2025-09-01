@@ -83,6 +83,12 @@ const FeedList = () => {
           title={multiSelect ? `${selected.length} selected` : "FeedIt"}
         />
         <Appbar.Action
+          icon="cog"
+          onPress={() => {
+            navigation.navigate("Settings");
+          }}
+        />
+        <Appbar.Action
           icon="refresh"
           onPress={() => {
             syncAll();
@@ -270,6 +276,7 @@ const FeedPage = (
   const feed = useFeedStore((state) =>
     state.feeds.find((f) => f.id === params.id)
   );
+  const markAllUnread = useFeedStore((state) => state.markAllUnread);
   if (!feed) return <Text>Not found</Text>;
   return (
     <View>
@@ -280,8 +287,30 @@ const FeedPage = (
           }}
         />
         <Appbar.Content title={feed?.title} />
+        <Appbar.Action
+          icon="check-all"
+          onPress={() => {
+            markAllUnread(params.id, false);
+          }}
+        />
       </Appbar.Header>
       <FeedItemList feedId={params.id} />
+    </View>
+  );
+};
+
+const SettingsPage = () => {
+  const navigation = useNavigation();
+  return (
+    <View>
+      <Appbar.Header>
+        <Appbar.BackAction
+          onPress={() => {
+            navigation.navigate({ name: "Home" });
+          }}
+        />
+        <Appbar.Content title={"Settings"} />
+      </Appbar.Header>
     </View>
   );
 };
@@ -291,6 +320,7 @@ const RootStack = createNativeStackNavigator({
   screens: {
     Home: HomePage,
     "Feed": FeedPage,
+    Settings: SettingsPage,
   },
   screenOptions: {
     headerShown: false,

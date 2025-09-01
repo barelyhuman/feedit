@@ -27,11 +27,12 @@ type FeedState = {
   addFeed: (rss: string) => void;
   removeFeed: (id: string) => void;
   markItemUnread: (feedId: string, itemId: string, unread: boolean) => void;
+  markAllUnread: (feedId: string, unread: boolean) => void;
   syncFeed: (id: string) => void;
   syncAll: () => void;
 };
 
-export const useFeedStore = create<FeedState>()(persist((set) => ({
+export const useFeedStore = create<FeedState>()(persist((set, get) => ({
   feeds: [],
   addFeed: async (rss: string) => {
     const rssString = await fetch(rss).then((d) => d.text());
@@ -42,6 +43,15 @@ export const useFeedStore = create<FeedState>()(persist((set) => ({
   },
   removeFeed: (id: string) => {
     set((state) => ({ feeds: state.feeds.filter((f) => f.id !== id) }));
+  },
+  markAllUnread(feedId, unread) {
+    set((state) => ({
+      feeds: state.feeds.map((f) =>
+        f.id === feedId
+          ? { ...f, items: f.items.map((d) => ({ ...d, unread })) }
+          : f
+      ),
+    }));
   },
   markItemUnread: (feedId, itemId, unread) => {
     set((state) => ({
@@ -58,45 +68,38 @@ export const useFeedStore = create<FeedState>()(persist((set) => ({
     }));
   },
   syncAll: async () => {
-    const currentFeeds = get().feeds;
-    set(() => ({
-      feeds: currentFeeds.map((d) => ({ ...d, isLoading: true })),
+    set((s) => ({
+      feeds: s.feeds.map((d) => ({ ...d, "isLoading": true })),
     }));
-    const newItems = await Promise.all(
-      currentFeeds.map(async (currentFeed) => {
-        const rssText = await fetch(d.link).then((d) => d.text());
-        const feed = parseRSS(rssText);
-
-        const _newItems = feed.items.filter((x) =>
-          !currentFeed.some((z) => z.link === x.link)
+    const feeds = await Promise.all(
+      get().feeds.map(async (d) => {
+        const response = await fetch(d.link).then((d) => d.text());
+        const feed = parseRSS(response);
+        const newItems = d.items.filter((x) =>
+          !feed.items.some((y) => y.id === x.id)
         );
-
-        return currentFeed.items.concat(_newItems).sort((y, x) =>
-          new Date(y).getTime() - new Date(x).getTime()
-        );
-      }),
-    );
-
-    set({
-      feeds: currentFeeds.map((d, i) => {
         return {
-          ...d,
+          ...feed,
+          id: d.id,
           isLoading: false,
-          items: newItems[i],
+          items: d.items.concat(newItems).sort(sortByPublished),
         };
       }),
+    );
+    set({
+      feeds: feeds as any,
     });
   },
   syncFeed: async (id) => {
-    const currentFeed = get().feeds.find((d) => d.id == id);
+    const currentFeed = get().feeds.find((d) => d.id === id);
+    if (!currentFeed) return;
+
     const rssText = await fetch(currentFeed.link).then((d) => d.text());
     const feed = parseRSS(rssText);
 
     const updatedItems = feed.items
-      .filter((x) => !currentFeed.items.some((z) => z.link === x.link))
-      .concat(currentFeed.items).sort((y, x) =>
-        new Date(y).getTime() - new Date(x).getTime()
-      );
+      .filter((x) => !currentFeed.items.some((z) => z.id === x.id))
+      .concat(currentFeed.items).sort(sortByPublished);
 
     set((state) => ({
       feeds: state.feeds.map((f) =>
@@ -145,3 +148,6 @@ function parseRSS(str: string) {
       : [],
   };
 }
+
+const sortByPublished = (y, x) =>
+  new Date(y.published).getTime() - new Date(x.published).getTime();
