@@ -1,6 +1,4 @@
 #!/bin/zsh
-# Script to build a release APK for the Feedit React Native app
-
 set -e
 
 # Install JS dependencies
