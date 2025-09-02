@@ -1,5 +1,12 @@
 import { View } from "react-native";
-import { Appbar, Button, ProgressBar, Text } from "react-native-paper";
+import {
+  Appbar,
+  Button,
+  Card,
+  ProgressBar,
+  Text,
+  useTheme,
+} from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
 import { pick, types } from "@react-native-documents/picker";
@@ -10,17 +17,14 @@ import { useCallback } from "react";
 const SettingsPage = () => {
   const navigation = useNavigation();
 
-  const {
-    total,
-    imported,
-    isImporting,
-    error,
-    startImport,
-    updateProgress,
-    finishImport,
-    setError,
-  } = useOpmlImportStore();
-
+  const total = useOpmlImportStore((s) => s.total);
+  const imported = useOpmlImportStore((s) => s.imported);
+  const isImporting = useOpmlImportStore((s) => s.isImporting);
+  const error = useOpmlImportStore((s) => s.error);
+  const startImport = useOpmlImportStore((s) => s.startImport);
+  const updateProgress = useOpmlImportStore((s) => s.updateProgress);
+  const finishImport = useOpmlImportStore((s) => s.finishImport);
+  const setError = useOpmlImportStore((s) => s.setError);
   const addFeed = useFeedStore((state) => state.addFeed);
 
   const handleImportOPML = useCallback(async () => {
@@ -48,7 +52,7 @@ const SettingsPage = () => {
       for (const outline of outlines) {
         const url = outline.xmlUrl;
         if (url) {
-          addFeed(url);
+          await addFeed(url);
         }
         importedCount++;
         updateProgress(importedCount);
@@ -69,27 +73,31 @@ const SettingsPage = () => {
         />
         <Appbar.Content title={"Settings"} />
       </Appbar.Header>
-      <View style={{ padding: 16 }}>
-        <Button
-          mode="contained"
-          onPress={handleImportOPML}
-          disabled={isImporting}
-        >
-          Import Feeds from OPML
-        </Button>
-        {isImporting && (
-          <View style={{ marginTop: 16 }}>
-            <Text>
-              Importing {imported} of {total} feeds...
-            </Text>
-            <ProgressBar
-              progress={total ? imported / total : 0}
-              style={{ marginTop: 8 }}
-            />
-          </View>
-        )}
-        {error && <Text style={{ color: "red", marginTop: 16 }}>{error}</Text>}
-      </View>
+      <Card style={{ marginLeft: 8, marginRight: 8 }}>
+        <Card.Title title="Import / Export" />
+        <Card.Content>
+          {isImporting && (
+            <View style={{ marginTop: 16 }}>
+              <Text>
+                Importing {imported} of {total} feeds...
+              </Text>
+              <ProgressBar
+                progress={total ? imported / total : 0}
+                style={{ marginTop: 8 }}
+              />
+            </View>
+          )}
+          <Button
+            mode="contained"
+            onPress={handleImportOPML}
+            disabled={isImporting}
+          >
+            Import Feeds from OPML
+          </Button>
+          {error && <Text style={{ color: "red", marginTop: 16 }}>{error}
+          </Text>}
+        </Card.Content>
+      </Card>
     </View>
   );
 };

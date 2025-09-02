@@ -25,7 +25,7 @@ export type Feed = {
 
 type FeedState = {
   feeds: Feed[];
-  addFeed: (rss: string) => void;
+  addFeed: (rss: string) => Promise<void>;
   removeFeed: (id: string) => void;
   markItemUnread: (feedId: string, itemId: string, unread: boolean) => void;
   markAllUnread: (feedId: string, unread: boolean) => void;
@@ -36,8 +36,10 @@ type FeedState = {
 export const useFeedStore = create<FeedState>()(persist((set, get) => ({
   feeds: [],
   addFeed: async (feedUrl: string) => {
+    if (get().feeds.some((d) => d.feedUrl === feedUrl)) return;
     const rssString = await fetch(feedUrl).then((d) => d.text());
     const feed = parseRSS(rssString);
+    feed.items = feed.items.sort(sortByPublished);
     set((state) => ({
       feeds: [...state.feeds, {
         ...feed,
@@ -82,15 +84,20 @@ export const useFeedStore = create<FeedState>()(persist((set, get) => ({
         if (!d.feedUrl) return;
         const response = await fetch(d.feedUrl).then((d) => d.text());
         const feed = parseRSS(response);
-        const newItems = d.items.filter((x) =>
-          !feed.items.some((y) => y.id === x.id)
-        );
+
+        const items = feed.items.map((x) => {
+          const existingItem = d.items.find((y) => y.id === x.id);
+          return Object.assign({}, existingItem, x, {
+            unread: existingItem?.unread,
+          });
+        }).sort(sortByPublished);
+
         return {
           ...feed,
           id: d.id,
           feedUrl: d.feedUrl,
           isLoading: false,
-          items: d.items.concat(newItems).sort(sortByPublished),
+          items: items,
         };
       }),
     );
@@ -148,7 +155,8 @@ function parseRSS(str: string) {
         return {
           id: d.id,
           link: link,
-          published: d.published,
+          description: d.description || d.content,
+          published: d.published || d.updated,
           title: typeof d.title === "string" ? d.title : "",
           unread: true,
         };
@@ -157,5 +165,6 @@ function parseRSS(str: string) {
   };
 }
 
-const sortByPublished = (y, x) =>
-  new Date(y.published).getTime() - new Date(x.published).getTime();
+const sortByPublished = (y, x) => {
+  return new Date(x.published).getTime() - new Date(y.published).getTime();
+};

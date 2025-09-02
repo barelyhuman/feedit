@@ -16,8 +16,10 @@ export const useOpmlImportStore = create<OpmlImportState>((set) => ({
   imported: 0,
   isImporting: false,
   error: undefined,
-  startImport: (total) => set({ total, imported: 0, isImporting: true, error: undefined }),
+  startImport: (total) =>
+    set(() => ({ total, imported: 0, isImporting: true, error: undefined })),
   updateProgress: (imported) => set((state) => ({ ...state, imported })),
   finishImport: () => set((state) => ({ ...state, isImporting: false })),
-  setError: (error) => set((state) => ({ ...state, error, isImporting: false })),
+  setError: (error) =>
+    set((state) => ({ ...state, error, isImporting: false })),
 }));

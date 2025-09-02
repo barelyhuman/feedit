@@ -99,6 +99,10 @@ const FeedList = () => {
             >
               <List.Item
                 title={feed.title}
+                style={{
+                  paddingTop:10,
+                  paddingBottom:10,
+                }}
                 titleStyle={{
                   color: isSelected
                     ? theme.colors.background

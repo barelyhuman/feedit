@@ -3,6 +3,10 @@ import { List, Text, useTheme } from "react-native-paper";
 import { useFeedStore } from "../lib/reactive";
 import FeedUnreadDot from "./FeedUnreadDot";
 
+const DateFmt = Intl.DateTimeFormat("en-GB", {
+  "dateStyle": "short",
+});
+
 const FeedItemList = ({ feedId }: { feedId: string }) => {
   const theme = useTheme();
   const feed = useFeedStore((state) =>
@@ -31,6 +35,7 @@ const FeedItemList = ({ feedId }: { feedId: string }) => {
           }}
         >
           <List.Item
+            style={{ paddingTop: 10, paddingBottom: 10 }}
             left={(props) => (
               <FeedUnreadDot
                 style={props.style}
@@ -39,6 +44,9 @@ const FeedItemList = ({ feedId }: { feedId: string }) => {
               />
             )}
             title={item.title}
+            description={item.published
+              ? DateFmt.format(new Date(item.published))
+              : item.description}
           />
         </TouchableOpacity>
       )}
