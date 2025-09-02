@@ -1,5 +1,5 @@
-import { FlatList, TouchableOpacity, Linking } from "react-native";
-import { Text, List, useTheme } from "react-native-paper";
+import { FlatList, Linking, TouchableOpacity } from "react-native";
+import { List, Text, useTheme } from "react-native-paper";
 import { useFeedStore } from "../lib/reactive";
 import FeedUnreadDot from "./FeedUnreadDot";
 
@@ -22,13 +22,12 @@ const FeedItemList = ({ feedId }: { feedId: string }) => {
       ListEmptyComponent={!isFeedLoading ? <Text>No Items</Text> : <></>}
       renderItem={({ item }) => (
         <TouchableOpacity
-          onPress={() => {
+          onPress={async () => {
             if (!item.link.trim()) return;
+            const canOpen = await Linking.canOpenURL(item.link);
+            if (!canOpen) return;
             markItemUnread(feed.id, item.id, false);
-            Linking.canOpenURL(item.link).then((canOpen) => {
-              if (!canOpen) return;
-              Linking.openURL(item.link);
-            });
+            Linking.openURL(item.link);
           }}
         >
           <List.Item
