@@ -90,6 +90,7 @@ const SettingsPage = () => {
           <Button
             mode="contained"
             onPress={handleImportOPML}
+            style={{marginTop:8}}
             disabled={isImporting}
           >
             Import Feeds from OPML
