@@ -83,6 +83,9 @@ const FeedList = () => {
       </Appbar.Header>
       <FlatList
         data={feeds}
+        style={{
+          paddingBottom: 25,
+        }}
         renderItem={({ item: feed }) => {
           const isSelected = selected.includes(feed.id);
           return (
@@ -100,8 +103,8 @@ const FeedList = () => {
               <List.Item
                 title={feed.title}
                 style={{
-                  paddingTop:10,
-                  paddingBottom:10,
+                  paddingTop: 10,
+                  paddingBottom: 10,
                 }}
                 titleStyle={{
                   color: isSelected

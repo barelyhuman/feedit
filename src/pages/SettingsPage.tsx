@@ -3,6 +3,7 @@ import {
   Appbar,
   Button,
   Card,
+  List,
   ProgressBar,
   Text,
   useTheme,
@@ -16,6 +17,7 @@ import { useCallback } from "react";
 
 const SettingsPage = () => {
   const navigation = useNavigation();
+  const theme = useTheme();
 
   const total = useOpmlImportStore((s) => s.total);
   const imported = useOpmlImportStore((s) => s.imported);
@@ -26,6 +28,8 @@ const SettingsPage = () => {
   const finishImport = useOpmlImportStore((s) => s.finishImport);
   const setError = useOpmlImportStore((s) => s.setError);
   const addFeed = useFeedStore((state) => state.addFeed);
+  const addToFailedItems = useOpmlImportStore((s) => s.addToFailedItems);
+  const failedItems = useOpmlImportStore((s) => s.failedItems);
 
   const handleImportOPML = useCallback(async () => {
     try {
@@ -52,7 +56,10 @@ const SettingsPage = () => {
       for (const outline of outlines) {
         const url = outline.xmlUrl;
         if (url) {
-          await addFeed(url);
+          await addFeed(url).catch((err) => {
+            console.error(err);
+            addToFailedItems(url);
+          });
         }
         importedCount++;
         updateProgress(importedCount);
@@ -61,7 +68,14 @@ const SettingsPage = () => {
     } catch (e: any) {
       setError(e.message || "Failed to import OPML");
     }
-  }, [addFeed, startImport, updateProgress, finishImport, setError]);
+  }, [
+    addFeed,
+    addToFailedItems,
+    startImport,
+    updateProgress,
+    finishImport,
+    setError,
+  ]);
 
   return (
     <View>
@@ -77,7 +91,7 @@ const SettingsPage = () => {
         <Card.Title title="Import / Export" />
         <Card.Content>
           {isImporting && (
-            <View style={{ marginTop: 16 }}>
+            <View style={{ marginTop: 16, marginBottom: 16 }}>
               <Text>
                 Importing {imported} of {total} feeds...
               </Text>
@@ -90,13 +104,29 @@ const SettingsPage = () => {
           <Button
             mode="contained"
             onPress={handleImportOPML}
-            style={{marginTop:8}}
             disabled={isImporting}
           >
             Import Feeds from OPML
           </Button>
-          {error && <Text style={{ color: "red", marginTop: 16 }}>{error}
-          </Text>}
+          {error && (
+            <Text style={{ color: theme.colors.error, marginTop: 16 }}>
+              {error}
+            </Text>
+          )}
+          {!isImporting && failedItems.length > 0
+            ? (
+              <>
+                <Text style={{ color: theme.colors.error, marginTop: 16 }}>
+                  The following failed to import
+                </Text>
+                <View>
+                  {failedItems.map((d) => {
+                    return <List.Item title={d} />;
+                  })}
+                </View>
+              </>
+            )
+            : null}
         </Card.Content>
       </Card>
     </View>
