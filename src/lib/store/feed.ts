@@ -1,10 +1,10 @@
 import "react-native-get-random-values";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { parseFeed } from "@rowanmanning/feed-parser";
 import { nanoid } from "nanoid";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { chunkAsyncStore } from "../chunkAsyncStore";
 
 export type FeedItem = {
   id: string;
@@ -130,7 +130,19 @@ export const useFeedStore = create<FeedState>()(persist((set, get) => ({
   },
 }), {
   name: "feedit",
-  storage: createJSONStorage(() => AsyncStorage),
+  storage: createJSONStorage(() => chunkAsyncStore),
+  partialize: (state) => ({
+    feeds: state.feeds,
+  }),
+  onRehydrateStorage: (state) => {
+    return (_, error) => {
+      if (error) {
+        console.error(error);
+      } else {
+        console.log("hydration finished");
+      }
+    };
+  },
 }));
 
 function parseRSS(str: string) {

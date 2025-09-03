@@ -1,7 +1,12 @@
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { Animated, FlatList } from "react-native";
-import { Appbar, List, TouchableRipple, useTheme } from "react-native-paper";
+import {
+  Appbar,
+  List,
+  TouchableRipple,
+  useTheme,
+} from "react-native-paper";
 import { useFeedStore } from "../lib/store/feed";
 import FeedRightIcons from "./FeedRightIcons";
 import FeedSelectIcon from "./FeedSelectIcon";
@@ -14,6 +19,7 @@ const FeedList = () => {
   const [multiSelect, setMultiSelect] = useState(false);
   const feeds = useFeedStore((state) => state.feeds);
   const removeFeed = useFeedStore((state) => state.removeFeed);
+
 
   useEffect(() => {
     Animated.loop(
@@ -44,6 +50,8 @@ const FeedList = () => {
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
   };
+
+
 
   return (
     <>
