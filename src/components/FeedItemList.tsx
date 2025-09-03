@@ -1,6 +1,6 @@
 import { FlatList, Linking, TouchableOpacity } from "react-native";
 import { List, Text, useTheme } from "react-native-paper";
-import { useFeedStore } from "../lib/reactive";
+import { useFeedStore } from "../lib/store/feed";
 import FeedUnreadDot from "./FeedUnreadDot";
 
 const DateFmt = Intl.DateTimeFormat("en-GB", {

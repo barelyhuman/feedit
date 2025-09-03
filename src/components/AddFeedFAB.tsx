@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Portal, Modal, Card, TextInput, Button, FAB, useTheme } from "react-native-paper";
-import { useFeedStore } from "../lib/reactive";
+import { useFeedStore } from "../lib/store/feed";
 import styles from "../styles/styles";
 
 const AddFeedFAB = () => {

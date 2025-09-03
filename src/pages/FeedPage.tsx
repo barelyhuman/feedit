@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import { Appbar, Text } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import { useFeedStore } from "../lib/reactive";
+import { useFeedStore } from "../lib/store/feed";
 import FeedItemList from "../components/FeedItemList";
 
 const FeedPage = (

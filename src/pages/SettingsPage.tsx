@@ -1,3 +1,7 @@
+import { pick, types } from "@react-native-documents/picker";
+import { useNavigation } from "@react-navigation/native";
+import { XMLParser } from "fast-xml-parser";
+import { useCallback } from "react";
 import { View } from "react-native";
 import {
   Appbar,
@@ -8,12 +12,8 @@ import {
   Text,
   useTheme,
 } from "react-native-paper";
-import { useNavigation } from "@react-navigation/native";
-import { XMLBuilder, XMLParser } from "fast-xml-parser";
-import { pick, types } from "@react-native-documents/picker";
+import { useFeedStore } from "../lib/store/feed";
 import { useOpmlImportStore } from "../store/opmlImportStore";
-import { useFeedStore } from "../lib/reactive";
-import { useCallback } from "react";
 
 const SettingsPage = () => {
   const navigation = useNavigation();
