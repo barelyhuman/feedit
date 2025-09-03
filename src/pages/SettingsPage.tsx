@@ -13,7 +13,7 @@ import {
   useTheme,
 } from "react-native-paper";
 import { useFeedStore } from "../lib/store/feed";
-import { useOpmlImportStore } from "../store/opmlImportStore";
+import { useOpmlImportStore } from "../lib/store/opmlImportStore";
 
 const SettingsPage = () => {
   const navigation = useNavigation();
