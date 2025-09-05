@@ -1,6 +1,6 @@
-import { createStaticNavigation, DefaultTheme } from "@react-navigation/native";
-import { adaptNavigationTheme } from "react-native-paper";
-import RootStack from "./RootStack";
+import { createStaticNavigation, DefaultTheme } from '@react-navigation/native';
+import { adaptNavigationTheme } from 'react-native-paper';
+import RootStack from './RootStack';
 
 const { LightTheme, DarkTheme } = adaptNavigationTheme({
   reactNavigationDark: DefaultTheme,

@@ -1,15 +1,10 @@
-import { useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
-import { Animated, FlatList } from "react-native";
-import {
-  Appbar,
-  List,
-  TouchableRipple,
-  useTheme,
-} from "react-native-paper";
-import { useFeedStore } from "../lib/store/feed";
-import FeedRightIcons from "./FeedRightIcons";
-import FeedSelectIcon from "./FeedSelectIcon";
+import { useNavigation } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
+import { Animated, FlatList } from 'react-native';
+import { Appbar, List, TouchableRipple, useTheme } from 'react-native-paper';
+import { useFeedStore } from '../lib/store/feed';
+import FeedRightIcons from './FeedRightIcons';
+import FeedSelectIcon from './FeedSelectIcon';
 
 const FeedList = () => {
   const navigation = useNavigation();
@@ -17,9 +12,8 @@ const FeedList = () => {
   const [rotateAnim] = useState(() => new Animated.Value(0));
   const [selected, setSelected] = useState<string[]>([]);
   const [multiSelect, setMultiSelect] = useState(false);
-  const feeds = useFeedStore((state) => state.feeds);
-  const removeFeed = useFeedStore((state) => state.removeFeed);
-
+  const feeds = useFeedStore(state => state.feeds);
+  const removeFeed = useFeedStore(state => state.removeFeed);
 
   useEffect(() => {
     Animated.loop(
@@ -33,36 +27,40 @@ const FeedList = () => {
 
   const rotation = rotateAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
+    outputRange: ['0deg', '360deg'],
   });
 
-  const syncAll = useFeedStore((state) => state.syncAll);
+  const syncAll = useFeedStore(state => state.syncAll);
 
   const handleSelect = (id: string) => {
     if (!multiSelect) {
       navigation.navigate({
-        name: "Feed",
+        name: 'Feed',
         params: { id },
       });
       return;
     }
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    setSelected(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id],
     );
   };
-
-
 
   return (
     <>
       <Appbar.Header>
+        <Appbar.Action
+          icon="hamburger"
+          onPress={() => {
+            navigation.toggleDrawer();
+          }}
+        />
         <Appbar.Content
-          title={multiSelect ? `${selected.length} selected` : "FeedIt"}
+          title={multiSelect ? `${selected.length} selected` : 'FeedIt'}
         />
         <Appbar.Action
           icon="cog"
           onPress={() => {
-            navigation.navigate("Settings");
+            navigation.navigate('Settings');
           }}
         />
         <Appbar.Action
@@ -75,16 +73,16 @@ const FeedList = () => {
           <Appbar.Action
             icon="delete"
             onPress={() => {
-              selected.forEach((id) => removeFeed(id));
+              selected.forEach(id => removeFeed(id));
               setSelected([]);
               setMultiSelect(false);
             }}
           />
         )}
         <Appbar.Action
-          icon={multiSelect ? "close" : "checkbox-multiple-marked"}
+          icon={multiSelect ? 'close' : 'checkbox-multiple-marked'}
           onPress={() => {
-            setMultiSelect((v) => !v);
+            setMultiSelect(v => !v);
             if (multiSelect) setSelected([]);
           }}
         />
@@ -104,9 +102,11 @@ const FeedList = () => {
                 setMultiSelect(true);
                 setSelected([feed.id]);
               }}
-              style={isSelected
-                ? [{ backgroundColor: theme.colors.onBackground }]
-                : null}
+              style={
+                isSelected
+                  ? [{ backgroundColor: theme.colors.onBackground }]
+                  : null
+              }
             >
               <List.Item
                 title={feed.title}
@@ -119,12 +119,14 @@ const FeedList = () => {
                     ? theme.colors.background
                     : theme.colors.onBackground,
                 }}
-                left={multiSelect
-                  ? ((props) => (
-                    <FeedSelectIcon {...props} selected={isSelected} />
-                  ))
-                  : undefined}
-                right={(props) => (
+                left={
+                  multiSelect
+                    ? props => (
+                        <FeedSelectIcon {...props} selected={isSelected} />
+                      )
+                    : undefined
+                }
+                right={props => (
                   <FeedRightIcons
                     {...props}
                     feed={feed}
