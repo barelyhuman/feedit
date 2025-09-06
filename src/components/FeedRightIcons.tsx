@@ -6,7 +6,6 @@ import styles from '../styles/styles';
 const FeedRightIcons = ({
   feed,
   multiSelect,
-  rotateAnim,
   rotation,
   theme,
   ...props
@@ -15,13 +14,7 @@ const FeedRightIcons = ({
   return (
     <View style={styles.rowCenter}>
       {feed.isLoading ? (
-        <Animated.View
-          ref={node => {
-            if (!node) return;
-            rotateAnim.resetAnimation();
-          }}
-          style={{ transform: [{ rotate: rotation }] }}
-        >
+        <Animated.View style={{ transform: [{ rotate: rotation }] }}>
           <Icon color={theme.colors.primary} name="loading" />
         </Animated.View>
       ) : feedUnreadCount > 0 ? (
