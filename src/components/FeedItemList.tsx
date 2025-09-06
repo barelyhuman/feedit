@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { FlatList, Linking, View } from 'react-native';
+import { InAppBrowser } from 'react-native-inappbrowser-reborn';
 import { List, Menu, Text, useTheme } from 'react-native-paper';
 import { useBookmarkStore } from '../lib/store/bookmarks';
 import { useFeedStore } from '../lib/store/feed';
 import FeedUnreadDot from './FeedUnreadDot';
 import WebViewThatOpensLinksInNavigator from './WebViewNavigator';
 import { useToast } from './Toast';
+import { useNavigation } from '@react-navigation/native';
+import { openUrl } from '../lib/url';
 
 const DateFmt = Intl.DateTimeFormat('en-GB', {
   dateStyle: 'short',
@@ -13,12 +16,12 @@ const DateFmt = Intl.DateTimeFormat('en-GB', {
 
 const FeedItemList = ({ feedId }: { feedId: string }) => {
   const theme = useTheme();
+  const navigation = useNavigation();
   const feed = useFeedStore(state => state.feeds.find(f => f.id === feedId));
   const markItemUnread = useFeedStore(state => state.markItemUnread);
   const syncFeed = useFeedStore(state => state.syncFeed);
   const toggleBookmark = useBookmarkStore(state => state.toggleBookmark);
   const isInBookmark = useBookmarkStore(state => state.isInBookmark);
-  const [showWebview, setShowWebview] = useState<string | null>();
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>({
     x: 0,
     y: 0,
@@ -75,18 +78,16 @@ const FeedItemList = ({ feedId }: { feedId: string }) => {
                     }}
                     onPress={async () => {
                       if (!item.link.trim()) return;
-                      const canOpen = await Linking.canOpenURL(item.link);
-                      if (!canOpen) return;
                       markItemUnread(feed.id, item.id, false);
-                      // Linking.openURL(item.link);
-                      setShowWebview(item.link.trim());
+                      openUrl(item.link);
+                      return;
                     }}
                   />
                 }
               >
                 <Menu.Item
-                  onPress={() => {
-                    setShowWebview(item.link);
+                  onPress={async () => {
+                    openUrl(item.link);
                   }}
                   title="Open"
                 />
@@ -113,7 +114,6 @@ const FeedItemList = ({ feedId }: { feedId: string }) => {
           )}
         />
       </View>
-      {showWebview && <WebViewThatOpensLinksInNavigator uri={showWebview} />}
     </>
   );
 };

@@ -2,10 +2,11 @@ import Icon from '@react-native-vector-icons/material-design-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import { FlatList, Linking, View } from 'react-native';
+import InAppBrowser from 'react-native-inappbrowser-reborn';
 import { Appbar, List, Menu, Text } from 'react-native-paper';
 import { useToast } from '../components/Toast';
-import WebViewThatOpensLinksInNavigator from '../components/WebViewNavigator';
 import { useBookmarkFeedStore, useBookmarkStore } from '../lib/store/bookmarks';
+import { openUrl } from '../lib/url';
 
 const DateFmt = Intl.DateTimeFormat('en-GB', {
   dateStyle: 'short',
@@ -22,7 +23,6 @@ const BookmarkPage = ({}: { route: { params: { id: string } } } & Record<
   const toggleBookmark = useBookmarkStore(state => state.toggleBookmark);
   const isInBookmark = useBookmarkStore(state => state.isInBookmark);
 
-  const [showWebview, setShowWebview] = useState<string | null>();
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>({
     x: 0,
     y: 0,
@@ -32,12 +32,6 @@ const BookmarkPage = ({}: { route: { params: { id: string } } } & Record<
   return (
     <View>
       <Appbar.Header>
-        <Appbar.Action
-          icon="hamburger"
-          onPress={() => {
-            navigation.toggleDrawer();
-          }}
-        />
         <Appbar.Content title={'Bookmarks'} />
       </Appbar.Header>
       <FlatList
@@ -50,7 +44,13 @@ const BookmarkPage = ({}: { route: { params: { id: string } } } & Record<
               visible={openMenuId === item.id}
               anchorPosition="top"
               style={{ top: menuPosition.y, left: menuPosition.x }}
-              onDismiss={() => setOpenMenuId(null)}
+              onDismiss={() => {
+                setMenuPosition({
+                  x: 0,
+                  y: 0,
+                });
+                setOpenMenuId(null);
+              }}
               anchor={
                 <List.Item
                   style={{ paddingTop: 10, paddingBottom: 10 }}
@@ -68,18 +68,16 @@ const BookmarkPage = ({}: { route: { params: { id: string } } } & Record<
                     });
                     setOpenMenuId(item.id);
                   }}
-                  onPress={async () => {
+                  onPress={() => {
                     if (!item.link.trim()) return;
-                    const canOpen = await Linking.canOpenURL(item.link);
-                    if (!canOpen) return;
-                    setShowWebview(item.link.trim());
+                    openUrl(item.link);
                   }}
                 />
               }
             >
               <Menu.Item
                 onPress={() => {
-                  setShowWebview(item.link);
+                  openUrl(item.link);
                 }}
                 title="Open"
               />
@@ -97,7 +95,6 @@ const BookmarkPage = ({}: { route: { params: { id: string } } } & Record<
           </View>
         )}
       />
-      {showWebview && <WebViewThatOpensLinksInNavigator uri={showWebview} />}
     </View>
   );
 };

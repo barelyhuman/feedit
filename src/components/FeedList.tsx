@@ -48,12 +48,6 @@ const FeedList = () => {
   return (
     <>
       <Appbar.Header>
-        <Appbar.Action
-          icon="hamburger"
-          onPress={() => {
-            navigation.toggleDrawer();
-          }}
-        />
         <Appbar.Content
           title={multiSelect ? `${selected.length} selected` : 'FeedIt'}
         />
