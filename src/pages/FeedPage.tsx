@@ -17,7 +17,7 @@ const FeedPage = (
   const markAllUnread = useFeedStore((state) => state.markAllUnread);
   if (!feed) return <Text>Not found</Text>;
   return (
-    <View>
+    <>
       <Appbar.Header>
         <Appbar.BackAction
           onPress={() => {
@@ -33,7 +33,7 @@ const FeedPage = (
         />
       </Appbar.Header>
       <FeedItemList feedId={params.id} />
-    </View>
+    </>
   );
 };
 

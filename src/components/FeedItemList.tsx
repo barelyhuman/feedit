@@ -1,58 +1,56 @@
-import { useState } from 'react';
-import { FlatList, View, StyleSheet, Pressable } from 'react-native';
+import { useState } from "react";
+import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import {
+  Divider,
+  IconButton,
   List,
   Menu,
   Text,
   useTheme,
-  IconButton,
-  Divider,
-} from 'react-native-paper';
-import { useBookmarkStore } from '../lib/store/bookmarks';
-import { useFeedStore } from '../lib/store/feed';
-import FeedUnreadDot from './FeedUnreadDot';
-import { useToast } from './Toast';
-import { openUrl } from '../lib/url';
+} from "react-native-paper";
+import { useBookmarkStore } from "../lib/store/bookmarks";
+import { useFeedStore } from "../lib/store/feed";
+import FeedUnreadDot from "./FeedUnreadDot";
+import { useToast } from "./Toast";
+import { openUrl } from "../lib/url";
 
-const DateFmt = Intl.DateTimeFormat('en-GB', {
-  dateStyle: 'short',
+const DateFmt = Intl.DateTimeFormat("en-GB", {
+  dateStyle: "short",
 });
 
 const FeedItemList = ({ feedId }: { feedId: string }) => {
   // navigation not used
-  const feed = useFeedStore(state => state.feeds.find(f => f.id === feedId));
-  const markItemUnread = useFeedStore(state => state.markItemUnread);
-  const syncFeed = useFeedStore(state => state.syncFeed);
-  const toggleBookmark = useBookmarkStore(state => state.toggleBookmark);
-  const isInBookmark = useBookmarkStore(state => state.isInBookmark);
+  const feed = useFeedStore((state) =>
+    state.feeds.find((f) => f.id === feedId)
+  );
+  const markItemUnread = useFeedStore((state) => state.markItemUnread);
+  const syncFeed = useFeedStore((state) => state.syncFeed);
+  const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
+  const isInBookmark = useBookmarkStore((state) => state.isInBookmark);
   // menu is handled per-row now
   const toast = useToast();
   if (!feed) return <></>;
   const isFeedLoading = feed.isLoading;
   return (
-    <>
-      <View>
-        <FlatList
-          refreshing={isFeedLoading}
-          data={feed.items}
-          keyExtractor={it => it.id}
-          onRefresh={() => {
-            syncFeed(feedId);
-          }}
-          ListEmptyComponent={!isFeedLoading ? <Text>No Items</Text> : <></>}
-          renderItem={({ item }) => (
-            <FeedItemRow
-              item={item}
-              feedId={feedId}
-              markItemUnread={markItemUnread}
-              toggleBookmark={toggleBookmark}
-              isInBookmark={isInBookmark}
-              openToast={toast}
-            />
-          )}
+    <FlatList
+      refreshing={isFeedLoading}
+      data={feed.items}
+      keyExtractor={(it) => it.id}
+      onRefresh={() => {
+        syncFeed(feedId);
+      }}
+      ListEmptyComponent={!isFeedLoading ? <Text>No Items</Text> : <></>}
+      renderItem={({ item }) => (
+        <FeedItemRow
+          item={item}
+          feedId={feedId}
+          markItemUnread={markItemUnread}
+          toggleBookmark={toggleBookmark}
+          isInBookmark={isInBookmark}
+          openToast={toast}
         />
-      </View>
-    </>
+      )}
+    />
   );
 };
 
@@ -82,7 +80,7 @@ const FeedItemRow = ({
           <FeedUnreadDot
             style={{
               marginTop: 10,
-              alignSelf: 'start',
+              alignSelf: "start",
             }}
             unread={!!item.unread}
             theme={theme}
@@ -96,13 +94,16 @@ const FeedItemRow = ({
             </Text>
           </View>
           <View style={styles.rightRow}>
-            {isInBookmark(feedId, item.id) ? (
-              <List.Icon icon="bookmark" />
-            ) : null}
+            {isInBookmark(feedId, item.id)
+              ? <List.Icon icon="bookmark" />
+              : null}
           </View>
           <Menu
             visible={open}
-            onDismiss={() => setOpen(false)}
+            onDismiss={() => {
+              console.log("Dismissed")
+              setOpen(false)
+            }}
             anchor={
               <IconButton
                 icon="dots-vertical"
@@ -115,12 +116,12 @@ const FeedItemRow = ({
             <Menu.Item
               onPress={() => {
                 const added = toggleBookmark(feedId, item.id);
-                const msg = `${added ? 'Added' : 'Removed'} from bookmarks`;
+                const msg = `${added ? "Added" : "Removed"} from bookmarks`;
                 openToast.show(msg);
                 setOpen(false);
               }}
               title={`${
-                isInBookmark(feedId, item.id) ? 'Remove from' : `Add to`
+                isInBookmark(feedId, item.id) ? "Remove from" : `Add to`
               } Bookmarks`}
             />
             <Menu.Item
@@ -139,11 +140,11 @@ const FeedItemRow = ({
 
 const styles = StyleSheet.create({
   item: { paddingTop: 10, paddingBottom: 10 },
-  rightRow: { flexDirection: 'row', alignItems: 'center' },
+  rightRow: { flexDirection: "row", alignItems: "center" },
   pressable: { paddingVertical: 10 },
-  row: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 },
+  row: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12 },
   content: { flex: 1, paddingHorizontal: 8 },
-  desc: { color: '#666', fontSize: 12 },
+  desc: { color: "#666", fontSize: 12 },
 });
 
 export default FeedItemList;

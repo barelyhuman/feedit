@@ -6,6 +6,7 @@ import {
   TextInput,
   Button,
   FAB,
+  Text,
   useTheme,
 } from 'react-native-paper';
 import { useFeedStore } from '../lib/store/feed';
@@ -14,10 +15,38 @@ import styles from '../styles/styles';
 const AddFeedFAB = () => {
   const [url, setUrl] = useState('');
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const theme = useTheme();
   const addFeed = useFeedStore(state => state.addFeed);
-  const showModal = () => setVisible(true);
-  const hideModal = () => setVisible(false);
+  const showModal = () => {
+    setError('');
+    setVisible(true);
+  };
+  const hideModal = () => {
+    setError('');
+    setVisible(false);
+  };
+
+  const validateAndAddFeed = async () => {
+    if (!url.trim()) return;
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch(url.trim());
+      const text = await response.text();
+      if (text.includes('<rss') || text.includes('<feed')) {
+        addFeed(url.trim());
+        setUrl('');
+        hideModal();
+      } else {
+        setError('URL does not contain valid RSS data.');
+      }
+    } catch (e) {
+      setError('Failed to fetch or parse RSS feed.');
+    }
+    setLoading(false);
+  };
   return (
     <>
       <Portal>
@@ -33,19 +62,17 @@ const AddFeedFAB = () => {
                 placeholder="https://reaper.is/rss.xml"
                 value={url}
                 onChangeText={setUrl}
+                error={!!error}
               />
+              {error ? (
+                <Text style={{ color: theme.colors.error, marginTop: 8 }}>
+                  {error}
+                </Text>
+              ) : null}
             </Card.Content>
             <Card.Actions style={styles.cardActions}>
-              <Button onPress={() => hideModal()}>Cancel</Button>
-              <Button
-                onPress={() => {
-                  if (url.trim()) {
-                    addFeed(url);
-                  }
-                  setUrl('');
-                  hideModal();
-                }}
-              >
+              <Button onPress={hideModal} disabled={loading}>Cancel</Button>
+              <Button onPress={validateAndAddFeed} loading={loading} disabled={loading}>
                 Ok
               </Button>
             </Card.Actions>

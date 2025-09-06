@@ -94,9 +94,6 @@ const FeedList = () => {
       </Appbar.Header>
       <FlatList
         data={feeds}
-        style={{
-          paddingBottom: 25,
-        }}
         renderItem={({ item: feed }) => {
           const isSelected = selected.includes(feed.id);
           return (
