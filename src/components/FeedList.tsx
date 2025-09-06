@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Animated, FlatList } from 'react-native';
 import { Appbar, List, TouchableRipple, useTheme } from 'react-native-paper';
 import { useFeedStore } from '../lib/store/feed';
@@ -9,21 +9,12 @@ import FeedSelectIcon from './FeedSelectIcon';
 const FeedList = () => {
   const navigation = useNavigation();
   const theme = useTheme();
-  const [rotateAnim] = useState(() => new Animated.Value(0));
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const animRef = useRef<any>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [multiSelect, setMultiSelect] = useState(false);
   const feeds = useFeedStore(state => state.feeds);
   const removeFeed = useFeedStore(state => state.removeFeed);
-
-  useEffect(() => {
-    Animated.loop(
-      Animated.timing(rotateAnim, {
-        toValue: 1,
-        duration: 1000,
-        useNativeDriver: true,
-      }),
-    ).start();
-  }, []);
 
   const rotation = rotateAnim.interpolate({
     inputRange: [0, 1],
@@ -48,12 +39,6 @@ const FeedList = () => {
   return (
     <>
       <Appbar.Header>
-        <Appbar.Action
-          icon="hamburger"
-          onPress={() => {
-            navigation.toggleDrawer();
-          }}
-        />
         <Appbar.Content
           title={multiSelect ? `${selected.length} selected` : 'FeedIt'}
         />
@@ -65,8 +50,28 @@ const FeedList = () => {
         />
         <Appbar.Action
           icon="refresh"
-          onPress={() => {
-            syncAll();
+          onPress={async () => {
+            if (!animRef.current) {
+              rotateAnim.setValue(0);
+              const anim = Animated.loop(
+                Animated.timing(rotateAnim, {
+                  toValue: 1,
+                  duration: 1000,
+                  useNativeDriver: true,
+                }),
+              );
+              anim.start();
+              animRef.current = anim;
+            }
+            try {
+              await syncAll();
+            } finally {
+              if (animRef.current) {
+                animRef.current.stop();
+                animRef.current = null;
+              }
+              rotateAnim.setValue(0);
+            }
           }}
         />
         {multiSelect && selected.length > 0 && (

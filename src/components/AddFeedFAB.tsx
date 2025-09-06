@@ -1,29 +1,31 @@
-import { useState } from "react";
-import { Portal, Modal, Card, TextInput, Button, FAB, useTheme } from "react-native-paper";
-import { useFeedStore } from "../lib/store/feed";
-import styles from "../styles/styles";
+import { useState } from 'react';
+import {
+  Portal,
+  Modal,
+  Card,
+  TextInput,
+  Button,
+  FAB,
+  useTheme,
+} from 'react-native-paper';
+import { useFeedStore } from '../lib/store/feed';
+import styles from '../styles/styles';
 
 const AddFeedFAB = () => {
-  const [url, setUrl] = useState("");
+  const [url, setUrl] = useState('');
   const [visible, setVisible] = useState(false);
   const theme = useTheme();
-  const addFeed = useFeedStore((state) => state.addFeed);
+  const addFeed = useFeedStore(state => state.addFeed);
   const showModal = () => setVisible(true);
   const hideModal = () => setVisible(false);
   return (
     <>
       <Portal>
-        <Modal
-          visible={visible}
-          onDismiss={hideModal}
-        >
+        <Modal visible={visible} onDismiss={hideModal}>
           <Card
             style={[styles.card, { backgroundColor: theme.colors.surface }]}
           >
-            <Card.Title
-              titleStyle={styles.cardTitle}
-              title={"Add Feed"}
-            />
+            <Card.Title titleStyle={styles.cardTitle} title={'Add Feed'} />
             <Card.Content>
               <TextInput
                 mode="outlined"
@@ -40,7 +42,7 @@ const AddFeedFAB = () => {
                   if (url.trim()) {
                     addFeed(url);
                   }
-                  setUrl("");
+                  setUrl('');
                   hideModal();
                 }}
               >
@@ -50,11 +52,7 @@ const AddFeedFAB = () => {
           </Card>
         </Modal>
       </Portal>
-      <FAB
-        icon="plus"
-        style={styles.fab}
-        onPress={() => showModal()}
-      />
+      <FAB icon="plus" style={styles.fab} onPress={() => showModal()} />
     </>
   );
 };

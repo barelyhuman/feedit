@@ -2491,11 +2491,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-navigation/bottom-tabs@npm:^7.4.6":
-  version: 7.4.6
-  resolution: "@react-navigation/bottom-tabs@npm:7.4.6"
+"@react-navigation/bottom-tabs@npm:^7.4.7":
+  version: 7.4.7
+  resolution: "@react-navigation/bottom-tabs@npm:7.4.7"
   dependencies:
-    "@react-navigation/elements": "npm:^2.6.3"
+    "@react-navigation/elements": "npm:^2.6.4"
     color: "npm:^4.2.3"
   peerDependencies:
     "@react-navigation/native": ^7.1.17
@@ -2503,7 +2503,7 @@ __metadata:
     react-native: "*"
     react-native-safe-area-context: ">= 4.0.0"
     react-native-screens: ">= 4.0.0"
-  checksum: 10c0/424afbd6a7b5b2a6b08e2bc33eb3f56b4d5a34a1ba105af136d240660c58703e6dcb00967a24bd90ea4735e3b3a32d994ce4680724072d1d8e3f323b77368afe
+  checksum: 10c0/dab1dea679e6754979aa0fc87e86544a7499511445000eb0a0f1a279a05619c83c732d4f3a62105755eeac9d8f239bad6d0ea602960bb33249ca563b53b2de09
   languageName: node
   linkType: hard
 
@@ -2521,26 +2521,6 @@ __metadata:
   peerDependencies:
     react: ">= 18.2.0"
   checksum: 10c0/0e8231ced4f196c84db859760b9704b85eca156ba0d8d9802a89d46d96116fa10fa481dc482be6a807b33971682bce176a997391543d2404754e43af510201b8
-  languageName: node
-  linkType: hard
-
-"@react-navigation/drawer@npm:^7.5.8":
-  version: 7.5.8
-  resolution: "@react-navigation/drawer@npm:7.5.8"
-  dependencies:
-    "@react-navigation/elements": "npm:^2.6.4"
-    color: "npm:^4.2.3"
-    react-native-drawer-layout: "npm:^4.1.13"
-    use-latest-callback: "npm:^0.2.4"
-  peerDependencies:
-    "@react-navigation/native": ^7.1.17
-    react: ">= 18.2.0"
-    react-native: "*"
-    react-native-gesture-handler: ">= 2.0.0"
-    react-native-reanimated: ">= 2.0.0"
-    react-native-safe-area-context: ">= 4.0.0"
-    react-native-screens: ">= 4.0.0"
-  checksum: 10c0/4805529383f68ac3e694ce39d2b3b9e12f826e689a03bc60feb93738b6b4d091ff03dd476f9a45db3b31d16b8ab199a98e4eb824b72b33ed28274952b8bd4568
   languageName: node
   linkType: hard
 
@@ -4278,6 +4258,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"derive-zustand@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "derive-zustand@npm:0.1.1"
+  peerDependencies:
+    zustand: ">=4.1.0"
+  checksum: 10c0/fe45e093ca1723103ab50c3b2257a7810a6f65adb2572c9b96706e3468aebaf104a26156130bc434a1831e76f792583d263797ba4f1b040a9244bccca49d8ebe
+  languageName: node
+  linkType: hard
+
 "destroy@npm:1.2.0":
   version: 1.2.0
   resolution: "destroy@npm:1.2.0"
@@ -5055,8 +5044,7 @@ __metadata:
     "@react-native/eslint-config": "npm:0.81.1"
     "@react-native/metro-config": "npm:0.81.1"
     "@react-native/typescript-config": "npm:0.81.1"
-    "@react-navigation/bottom-tabs": "npm:^7.4.6"
-    "@react-navigation/drawer": "npm:^7.5.8"
+    "@react-navigation/bottom-tabs": "npm:^7.4.7"
     "@react-navigation/native": "npm:^7.1.17"
     "@react-navigation/native-stack": "npm:^7.3.25"
     "@react-navigation/stack": "npm:^7.4.7"
@@ -5067,14 +5055,10 @@ __metadata:
     "@types/react-native-rss-parser": "npm:^1"
     "@types/react-native-sqlite-storage": "npm:^6"
     "@types/react-test-renderer": "npm:^19.1.0"
+    derive-zustand: "npm:^0.1.1"
     eslint: "npm:^8.19.0"
     fast-xml-parser: "npm:^5.2.5"
     jest: "npm:^29.6.3"
-    mobx: "npm:^6.13.7"
-    mobx-persist-store: "npm:^1.1.8"
-    mobx-react-lite: "npm:^4.1.0"
-    mobx-state-tree: "npm:^7.0.2"
-    mobx-utils: "npm:^6.1.1"
     nanoid: "npm:^5.1.5"
     prettier: "npm:2.8.8"
     react: "npm:19.1.0"
@@ -5082,6 +5066,7 @@ __metadata:
     react-native-fs: "npm:^2.20.0"
     react-native-gesture-handler: "npm:^2.28.0"
     react-native-get-random-values: "npm:^1.11.0"
+    react-native-inappbrowser-reborn: "npm:^3.7.0"
     react-native-paper: "npm:^5.14.5"
     react-native-reanimated: "npm:^4.1.0"
     react-native-safe-area-context: "npm:^5.6.1"
@@ -5091,8 +5076,6 @@ __metadata:
     react-native-xml2js: "npm:^1.0.3"
     react-test-renderer: "npm:19.1.0"
     typescript: "npm:^5.8.3"
-    wonka: "npm:^6.3.5"
-    xstream: "npm:^11.14.0"
     zustand: "npm:^5.0.8"
   languageName: unknown
   linkType: soft
@@ -5417,7 +5400,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globalthis@npm:^1.0.1, globalthis@npm:^1.0.4":
+"globalthis@npm:^1.0.4":
   version: 1.0.4
   resolution: "globalthis@npm:1.0.4"
   dependencies:
@@ -7401,59 +7384,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx-persist-store@npm:^1.1.8":
-  version: 1.1.8
-  resolution: "mobx-persist-store@npm:1.1.8"
-  peerDependencies:
-    mobx: "*"
-  checksum: 10c0/1a66bb14d5573bceebf3b6495e51e252dff8747a4654143e906f08632106c44532f7ff9193fd904cb56b9411c0c4afe9b1b62fcbc00424783e9445ab9956fdba
-  languageName: node
-  linkType: hard
-
-"mobx-react-lite@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "mobx-react-lite@npm:4.1.0"
-  dependencies:
-    use-sync-external-store: "npm:^1.4.0"
-  peerDependencies:
-    mobx: ^6.9.0
-    react: ^16.8.0 || ^17 || ^18 || ^19
-  peerDependenciesMeta:
-    react-dom:
-      optional: true
-    react-native:
-      optional: true
-  checksum: 10c0/72300665cc64d73a58d650bdf5131878376a865ae708cabc2940ee22cf6b762aeed239a83ea104ea3742a0b1563a81a19acc02f162e19f524a9b5b0f0a86668e
-  languageName: node
-  linkType: hard
-
-"mobx-state-tree@npm:^7.0.2":
-  version: 7.0.2
-  resolution: "mobx-state-tree@npm:7.0.2"
-  dependencies:
-    ts-essentials: "npm:^9.4.1"
-  peerDependencies:
-    mobx: ^6.3.0
-  checksum: 10c0/3a4c22b8ccdace789451593573a962fa26c4f5405ec9b8c3ba613cae82cfa3adbbbace1e61df2bee28ced72a53c417e9292f134466f99841548bca97bd43a547
-  languageName: node
-  linkType: hard
-
-"mobx-utils@npm:^6.1.1":
-  version: 6.1.1
-  resolution: "mobx-utils@npm:6.1.1"
-  peerDependencies:
-    mobx: ^6.0.0
-  checksum: 10c0/85de1f4b4b7854db6a27d28211a507bf937e9c25f0052eb913fed344c69f6b293153bb658971c0b8495d9a23571770215232e1df22ed54cae6b79e08bfab12a2
-  languageName: node
-  linkType: hard
-
-"mobx@npm:^6.13.7":
-  version: 6.13.7
-  resolution: "mobx@npm:6.13.7"
-  checksum: 10c0/3ae7f8c586a48a0a2b9b4900871455bc93d3878bdff70b6820ba830c6b883d7f8a0222aa2a0fec7201d25f38a19cb340e62a18a3939182a676dc35d857f35dd6
-  languageName: node
-  linkType: hard
-
 "ms@npm:2.0.0":
   version: 2.0.0
   resolution: "ms@npm:2.0.0"
@@ -7735,6 +7665,15 @@ __metadata:
     is-docker: "npm:^2.0.0"
     is-wsl: "npm:^2.1.1"
   checksum: 10c0/77573a6a68f7364f3a19a4c80492712720746b63680ee304555112605ead196afe91052bd3c3d165efdf4e9d04d255e87de0d0a77acec11ef47fd5261251813f
+  languageName: node
+  linkType: hard
+
+"opencollective-postinstall@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "opencollective-postinstall@npm:2.0.3"
+  bin:
+    opencollective-postinstall: index.js
+  checksum: 10c0/8a0104a218bc1afaae943f0af378461eeb2836f9848bad872bbd067ec5d1d9791636f307454ab77d0746f10341366f295384656a340ebdb87a2585058e8567e5
   languageName: node
   linkType: hard
 
@@ -8184,20 +8123,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-drawer-layout@npm:^4.1.13":
-  version: 4.1.13
-  resolution: "react-native-drawer-layout@npm:4.1.13"
-  dependencies:
-    use-latest-callback: "npm:^0.2.4"
-  peerDependencies:
-    react: ">= 18.2.0"
-    react-native: "*"
-    react-native-gesture-handler: ">= 2.0.0"
-    react-native-reanimated: ">= 2.0.0"
-  checksum: 10c0/446213bd177d19a929997689d3ef271df4017a0660a782b325023b8ccc5595b3ceb76934093ad02a7324b62bff7f5351e5039954688bd5a66ba3b3f40d35d44b
-  languageName: node
-  linkType: hard
-
 "react-native-fs@npm:^2.20.0":
   version: 2.20.0
   resolution: "react-native-fs@npm:2.20.0"
@@ -8236,6 +8161,18 @@ __metadata:
   peerDependencies:
     react-native: ">=0.56"
   checksum: 10c0/2ce71f1ab7f5b36d4a9dd59cc80b4aa75526f047c6680a7f1a388fa8b9a62efdacaf7b7de3be593c73e882773b2eee74916b00f7c8b158e40b46388998218586
+  languageName: node
+  linkType: hard
+
+"react-native-inappbrowser-reborn@npm:^3.7.0":
+  version: 3.7.0
+  resolution: "react-native-inappbrowser-reborn@npm:3.7.0"
+  dependencies:
+    invariant: "npm:^2.2.4"
+    opencollective-postinstall: "npm:^2.0.3"
+  peerDependencies:
+    react-native: ">=0.56"
+  checksum: 10c0/b14d564925eec2c95fc6f8931b68f9ae7c418b5ccad2494748282ee9f7460f7094eec3c6e3a6304062124277624c0f6f647f41a7950ab263b7ebb7c6b0d50d4d
   languageName: node
   linkType: hard
 
@@ -9310,13 +9247,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"symbol-observable@npm:^2.0.3":
-  version: 2.0.3
-  resolution: "symbol-observable@npm:2.0.3"
-  checksum: 10c0/03fb8766b75bfa65a3c7d68ae1e51a13a5ff71b40d6d53b17a0c9c77b1685c20a3bfbf45547ab36214a079665c3f551e250798f6b2f83a2a40762d864ed87f78
-  languageName: node
-  linkType: hard
-
 "tar@npm:^7.4.3":
   version: 7.4.3
   resolution: "tar@npm:7.4.3"
@@ -9416,18 +9346,6 @@ __metadata:
   peerDependencies:
     typescript: ">=4.2.0"
   checksum: 10c0/e65dc6e7e8141140c23e1dc94984bf995d4f6801919c71d6dc27cf0cd51b100a91ffcfe5217626193e5bea9d46831e8586febdc7e172df3f1091a7384299e23a
-  languageName: node
-  linkType: hard
-
-"ts-essentials@npm:^9.4.1":
-  version: 9.4.2
-  resolution: "ts-essentials@npm:9.4.2"
-  peerDependencies:
-    typescript: ">=4.1.0"
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 10c0/125d79a0fc4fbfcfbc6f6461e05cde1f9da46035867ae3164812e615d6cc02cd0b2f470c944f619e87f89bebb00b81eb5c9558e83cf6e8e0f47be184474f855e
   languageName: node
   linkType: hard
 
@@ -9690,7 +9608,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-sync-external-store@npm:^1.4.0, use-sync-external-store@npm:^1.5.0":
+"use-sync-external-store@npm:^1.5.0":
   version: 1.5.0
   resolution: "use-sync-external-store@npm:1.5.0"
   peerDependencies:
@@ -9867,13 +9785,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"wonka@npm:^6.3.5":
-  version: 6.3.5
-  resolution: "wonka@npm:6.3.5"
-  checksum: 10c0/044fe5ae26c0a32b0a1603cc0ed71ede8c9febe5bb3adab4fad5e088ceee600a84a08d0deb95a72189bbaf0d510282d183b6fb7b6e9837e7a1c9b209f788dd07
-  languageName: node
-  linkType: hard
-
 "word-wrap@npm:^1.2.5":
   version: 1.2.5
   resolution: "word-wrap@npm:1.2.5"
@@ -9966,16 +9877,6 @@ __metadata:
   version: 15.1.1
   resolution: "xmlbuilder@npm:15.1.1"
   checksum: 10c0/665266a8916498ff8d82b3d46d3993913477a254b98149ff7cff060d9b7cc0db7cf5a3dae99aed92355254a808c0e2e3ec74ad1b04aa1061bdb8dfbea26c18b8
-  languageName: node
-  linkType: hard
-
-"xstream@npm:^11.14.0":
-  version: 11.14.0
-  resolution: "xstream@npm:11.14.0"
-  dependencies:
-    globalthis: "npm:^1.0.1"
-    symbol-observable: "npm:^2.0.3"
-  checksum: 10c0/7a28baedc64385dc17597d04c7130ec3135db298e66d6dcf33821eb1953d5ad1b83c5fa08f1ce4d36e75fd219f2e9ef81ee0721aa8d4ccf619acc1760ba37f71
   languageName: node
   linkType: hard
 
