@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, FlatList } from 'react-native';
 import { Appbar, List, TouchableRipple, useTheme } from 'react-native-paper';
 import { useFeedStore } from '../lib/store/feed';
@@ -9,7 +9,7 @@ import FeedSelectIcon from './FeedSelectIcon';
 const FeedList = () => {
   const navigation = useNavigation();
   const theme = useTheme();
-  const [rotateAnim] = useState(() => new Animated.Value(0));
+  const rotateAnim = useRef(new Animated.Value(0)).current;
   const [selected, setSelected] = useState<string[]>([]);
   const [multiSelect, setMultiSelect] = useState(false);
   const feeds = useFeedStore(state => state.feeds);
@@ -23,7 +23,7 @@ const FeedList = () => {
         useNativeDriver: true,
       }),
     ).start();
-  }, []);
+  }, [rotateAnim]);
 
   const rotation = rotateAnim.interpolate({
     inputRange: [0, 1],
@@ -59,8 +59,9 @@ const FeedList = () => {
         />
         <Appbar.Action
           icon="refresh"
-          onPress={() => {
-            syncAll();
+          onPress={async () => {
+            await syncAll();
+            rotateAnim.setValue(0);
           }}
         />
         {multiSelect && selected.length > 0 && (
@@ -125,6 +126,7 @@ const FeedList = () => {
                     {...props}
                     feed={feed}
                     multiSelect={multiSelect}
+                    rotateAnim={rotateAnim}
                     rotation={rotation}
                     theme={theme}
                   />
