@@ -1,13 +1,17 @@
 import { useState } from 'react';
-import { FlatList, Linking, View } from 'react-native';
-import { InAppBrowser } from 'react-native-inappbrowser-reborn';
-import { List, Menu, Text, useTheme } from 'react-native-paper';
+import { FlatList, View, StyleSheet, Pressable } from 'react-native';
+import {
+  List,
+  Menu,
+  Text,
+  useTheme,
+  IconButton,
+  Divider,
+} from 'react-native-paper';
 import { useBookmarkStore } from '../lib/store/bookmarks';
 import { useFeedStore } from '../lib/store/feed';
 import FeedUnreadDot from './FeedUnreadDot';
-import WebViewThatOpensLinksInNavigator from './WebViewNavigator';
 import { useToast } from './Toast';
-import { useNavigation } from '@react-navigation/native';
 import { openUrl } from '../lib/url';
 
 const DateFmt = Intl.DateTimeFormat('en-GB', {
@@ -15,18 +19,13 @@ const DateFmt = Intl.DateTimeFormat('en-GB', {
 });
 
 const FeedItemList = ({ feedId }: { feedId: string }) => {
-  const theme = useTheme();
-  const navigation = useNavigation();
+  // navigation not used
   const feed = useFeedStore(state => state.feeds.find(f => f.id === feedId));
   const markItemUnread = useFeedStore(state => state.markItemUnread);
   const syncFeed = useFeedStore(state => state.syncFeed);
   const toggleBookmark = useBookmarkStore(state => state.toggleBookmark);
   const isInBookmark = useBookmarkStore(state => state.isInBookmark);
-  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  // menu is handled per-row now
   const toast = useToast();
   if (!feed) return <></>;
   const isFeedLoading = feed.isLoading;
@@ -42,80 +41,109 @@ const FeedItemList = ({ feedId }: { feedId: string }) => {
           }}
           ListEmptyComponent={!isFeedLoading ? <Text>No Items</Text> : <></>}
           renderItem={({ item }) => (
-            <View>
-              <Menu
-                visible={openMenuId === item.id}
-                anchorPosition="top"
-                style={{ top: menuPosition.y, left: menuPosition.x }}
-                onDismiss={() => setOpenMenuId(null)}
-                anchor={
-                  <List.Item
-                    style={{ paddingTop: 10, paddingBottom: 10 }}
-                    left={props => (
-                      <FeedUnreadDot
-                        style={props.style}
-                        unread={!!item.unread}
-                        theme={theme}
-                      />
-                    )}
-                    right={props => {
-                      return isInBookmark(feed.id, item.id) ? (
-                        <List.Icon icon="bookmark" {...props} />
-                      ) : null;
-                    }}
-                    title={item.title}
-                    description={
-                      item.published
-                        ? DateFmt.format(new Date(item.published))
-                        : item.link
-                    }
-                    onLongPress={event => {
-                      setMenuPosition({
-                        x: event.nativeEvent.pageX,
-                        y: event.nativeEvent.pageY,
-                      });
-                      setOpenMenuId(item.id);
-                    }}
-                    onPress={async () => {
-                      if (!item.link.trim()) return;
-                      markItemUnread(feed.id, item.id, false);
-                      openUrl(item.link);
-                      return;
-                    }}
-                  />
-                }
-              >
-                <Menu.Item
-                  onPress={async () => {
-                    openUrl(item.link);
-                  }}
-                  title="Open"
-                />
-                <Menu.Item
-                  onPress={() => {
-                    const added = toggleBookmark(feed.id, item.id);
-                    const msg = `${added ? 'Added' : 'Removed'} from bookmarks`;
-                    toast.show(msg);
-                    setOpenMenuId(null);
-                  }}
-                  title={`${
-                    isInBookmark(feed.id, item.id) ? 'Remove from' : `Add to`
-                  } Bookmarks`}
-                />
-                <Menu.Item
-                  onPress={() => {
-                    markItemUnread(feed.id, item.id, false);
-                    setOpenMenuId(null);
-                  }}
-                  title="Mark as Read"
-                />
-              </Menu>
-            </View>
+            <FeedItemRow
+              item={item}
+              feedId={feedId}
+              markItemUnread={markItemUnread}
+              toggleBookmark={toggleBookmark}
+              isInBookmark={isInBookmark}
+              openToast={toast}
+            />
           )}
         />
       </View>
     </>
   );
 };
+
+const FeedItemRow = ({
+  item,
+  feedId,
+  markItemUnread,
+  toggleBookmark,
+  isInBookmark,
+  openToast,
+}: any) => {
+  const theme = useTheme();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <View>
+      <Pressable
+        onPress={async () => {
+          if (!item.link.trim()) return;
+          markItemUnread(feedId, item.id, false);
+          openUrl(item.link);
+          return;
+        }}
+        style={styles.pressable}
+      >
+        <View style={styles.row}>
+          <FeedUnreadDot
+            style={{
+              marginTop: 10,
+              alignSelf: 'start',
+            }}
+            unread={!!item.unread}
+            theme={theme}
+          />
+          <View style={styles.content}>
+            <Text numberOfLines={1}>{item.title}</Text>
+            <Text style={styles.desc} numberOfLines={1}>
+              {item.published
+                ? DateFmt.format(new Date(item.published))
+                : item.link}
+            </Text>
+          </View>
+          <View style={styles.rightRow}>
+            {isInBookmark(feedId, item.id) ? (
+              <List.Icon icon="bookmark" />
+            ) : null}
+          </View>
+          <Menu
+            visible={open}
+            onDismiss={() => setOpen(false)}
+            anchor={
+              <IconButton
+                icon="dots-vertical"
+                size={20}
+                onPress={() => setOpen(true)}
+              />
+            }
+          >
+            <Menu.Item onPress={async () => openUrl(item.link)} title="Open" />
+            <Menu.Item
+              onPress={() => {
+                const added = toggleBookmark(feedId, item.id);
+                const msg = `${added ? 'Added' : 'Removed'} from bookmarks`;
+                openToast.show(msg);
+                setOpen(false);
+              }}
+              title={`${
+                isInBookmark(feedId, item.id) ? 'Remove from' : `Add to`
+              } Bookmarks`}
+            />
+            <Menu.Item
+              onPress={() => {
+                markItemUnread(feedId, item.id, false);
+                setOpen(false);
+              }}
+              title="Mark as Read"
+            />
+          </Menu>
+        </View>
+      </Pressable>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  item: { paddingTop: 10, paddingBottom: 10 },
+  rightRow: { flexDirection: 'row', alignItems: 'center' },
+  pressable: { paddingVertical: 10 },
+  row: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12 },
+  content: { flex: 1, paddingHorizontal: 8 },
+  desc: { color: '#666', fontSize: 12 },
+});
 
 export default FeedItemList;
