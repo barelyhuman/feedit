@@ -1,9 +1,7 @@
 import Icon from '@react-native-vector-icons/material-design-icons';
-import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
-import { FlatList, Linking, View } from 'react-native';
-import InAppBrowser from 'react-native-inappbrowser-reborn';
-import { Appbar, List, Menu, Text } from 'react-native-paper';
+import { FlatList, View } from 'react-native';
+import { Appbar, List, Menu, Text, useTheme } from 'react-native-paper';
 import { useToast } from '../components/Toast';
 import { useBookmarkFeedStore, useBookmarkStore } from '../lib/store/bookmarks';
 import { openUrl } from '../lib/url';
@@ -16,7 +14,7 @@ const BookmarkPage = ({}: { route: { params: { id: string } } } & Record<
   any,
   unknown
 >) => {
-  const navigation = useNavigation();
+  const theme = useTheme();
   const bookmarkedItems = useBookmarkFeedStore();
   const toast = useToast();
 
@@ -37,7 +35,11 @@ const BookmarkPage = ({}: { route: { params: { id: string } } } & Record<
       <FlatList
         keyExtractor={it => it.id}
         data={bookmarkedItems}
-        ListEmptyComponent={<Text>No Bookmarks</Text>}
+        ListEmptyComponent={
+          <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ color: theme.colors.secondary }}>No Bookmarks</Text>
+          </View>
+        }
         renderItem={({ item }) => (
           <View>
             <Menu

@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { CommonActions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { BottomNavigation } from 'react-native-paper';
-import BookmarkPage from '../pages/BookmarsPage';
+import BookmarkPage from '../pages/BookmarksPage';
 import FeedPage from '../pages/FeedPage';
 import HomePage from '../pages/HomePage';
 import SettingsPage from '../pages/SettingsPage';
