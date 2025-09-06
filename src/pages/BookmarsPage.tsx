@@ -1,12 +1,34 @@
+import Icon from '@react-native-vector-icons/material-design-icons';
 import { useNavigation } from '@react-navigation/native';
-import { View } from 'react-native';
-import { Appbar } from 'react-native-paper';
+import { useState } from 'react';
+import { FlatList, Linking, View } from 'react-native';
+import { Appbar, List, Menu, Text } from 'react-native-paper';
+import { useToast } from '../components/Toast';
+import WebViewThatOpensLinksInNavigator from '../components/WebViewNavigator';
+import { useBookmarkFeedStore, useBookmarkStore } from '../lib/store/bookmarks';
+
+const DateFmt = Intl.DateTimeFormat('en-GB', {
+  dateStyle: 'short',
+});
 
 const BookmarkPage = ({}: { route: { params: { id: string } } } & Record<
   any,
   unknown
 >) => {
   const navigation = useNavigation();
+  const bookmarkedItems = useBookmarkFeedStore();
+  const toast = useToast();
+
+  const toggleBookmark = useBookmarkStore(state => state.toggleBookmark);
+  const isInBookmark = useBookmarkStore(state => state.isInBookmark);
+
+  const [showWebview, setShowWebview] = useState<string | null>();
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
   return (
     <View>
       <Appbar.Header>
@@ -18,6 +40,64 @@ const BookmarkPage = ({}: { route: { params: { id: string } } } & Record<
         />
         <Appbar.Content title={'Bookmarks'} />
       </Appbar.Header>
+      <FlatList
+        keyExtractor={it => it.id}
+        data={bookmarkedItems}
+        ListEmptyComponent={<Text>No Bookmarks</Text>}
+        renderItem={({ item }) => (
+          <View>
+            <Menu
+              visible={openMenuId === item.id}
+              anchorPosition="top"
+              style={{ top: menuPosition.y, left: menuPosition.x }}
+              onDismiss={() => setOpenMenuId(null)}
+              anchor={
+                <List.Item
+                  style={{ paddingTop: 10, paddingBottom: 10 }}
+                  left={props => <Icon name="bookmark" {...props} />}
+                  title={item.title}
+                  description={
+                    item.published
+                      ? DateFmt.format(new Date(item.published))
+                      : item.link
+                  }
+                  onLongPress={event => {
+                    setMenuPosition({
+                      x: event.nativeEvent.pageX,
+                      y: event.nativeEvent.pageY,
+                    });
+                    setOpenMenuId(item.id);
+                  }}
+                  onPress={async () => {
+                    if (!item.link.trim()) return;
+                    const canOpen = await Linking.canOpenURL(item.link);
+                    if (!canOpen) return;
+                    setShowWebview(item.link.trim());
+                  }}
+                />
+              }
+            >
+              <Menu.Item
+                onPress={() => {
+                  setShowWebview(item.link);
+                }}
+                title="Open"
+              />
+              <Menu.Item
+                onPress={() => {
+                  const added = toggleBookmark(item.feedId, item.id);
+                  const msg = `${added ? 'Added' : 'Removed'} from bookmarks`;
+                  toast.show(msg);
+                }}
+                title={`${
+                  isInBookmark(item.feedId, item.id) ? 'Remove from' : `Add to`
+                } Bookmarks`}
+              />
+            </Menu>
+          </View>
+        )}
+      />
+      {showWebview && <WebViewThatOpensLinksInNavigator uri={showWebview} />}
     </View>
   );
 };

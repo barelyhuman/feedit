@@ -4278,6 +4278,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"derive-zustand@npm:^0.1.1":
+  version: 0.1.1
+  resolution: "derive-zustand@npm:0.1.1"
+  peerDependencies:
+    zustand: ">=4.1.0"
+  checksum: 10c0/fe45e093ca1723103ab50c3b2257a7810a6f65adb2572c9b96706e3468aebaf104a26156130bc434a1831e76f792583d263797ba4f1b040a9244bccca49d8ebe
+  languageName: node
+  linkType: hard
+
 "destroy@npm:1.2.0":
   version: 1.2.0
   resolution: "destroy@npm:1.2.0"
@@ -5067,6 +5076,7 @@ __metadata:
     "@types/react-native-rss-parser": "npm:^1"
     "@types/react-native-sqlite-storage": "npm:^6"
     "@types/react-test-renderer": "npm:^19.1.0"
+    derive-zustand: "npm:^0.1.1"
     eslint: "npm:^8.19.0"
     fast-xml-parser: "npm:^5.2.5"
     jest: "npm:^29.6.3"
@@ -5087,6 +5097,7 @@ __metadata:
     react-native-safe-area-context: "npm:^5.6.1"
     react-native-screens: "npm:^4.15.4"
     react-native-share: "npm:^12.2.0"
+    react-native-webview: "npm:^13.16.0"
     react-native-worklets: "npm:^0.5.0"
     react-native-xml2js: "npm:^1.0.3"
     react-test-renderer: "npm:19.1.0"
@@ -5715,7 +5726,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"invariant@npm:^2.2.4":
+"invariant@npm:2.2.4, invariant@npm:^2.2.4":
   version: 2.2.4
   resolution: "invariant@npm:2.2.4"
   dependencies:
@@ -8307,6 +8318,19 @@ __metadata:
   version: 12.2.0
   resolution: "react-native-share@npm:12.2.0"
   checksum: 10c0/6c5434f067167862e3e02a969e71d20ab99839595a38e7040b09f31db6dea807ed7d437b814a41977205c8107e8684ce934dd18fd7c25f962e987f0251a77e81
+  languageName: node
+  linkType: hard
+
+"react-native-webview@npm:^13.16.0":
+  version: 13.16.0
+  resolution: "react-native-webview@npm:13.16.0"
+  dependencies:
+    escape-string-regexp: "npm:^4.0.0"
+    invariant: "npm:2.2.4"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/813c3cb176effd65f8d9b45eb00732ac87bfab2d0b1c4016f0d43e95f9a287e495913540ebe4f47da868c804f6fdcb2246a2156d6e31712bd426b43bcecc8e7f
   languageName: node
   linkType: hard
 
