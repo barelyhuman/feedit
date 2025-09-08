@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native'
 
 const styles = StyleSheet.create({
   rowCenter: {
@@ -28,6 +28,6 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-});
+})
 
-export default styles;
+export default styles

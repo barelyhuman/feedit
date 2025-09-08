@@ -1,5 +1,5 @@
-import FeedList from "../components/FeedList";
-import AddFeedFAB from "../components/AddFeedFAB";
+import FeedList from '../components/FeedList'
+import AddFeedFAB from '../components/AddFeedFAB'
 
 const HomePage = () => {
   return (
@@ -7,7 +7,7 @@ const HomePage = () => {
       <FeedList />
       <AddFeedFAB />
     </>
-  );
-};
+  )
+}
 
-export default HomePage;
+export default HomePage

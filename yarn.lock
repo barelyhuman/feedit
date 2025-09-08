@@ -1512,6 +1512,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@barelyhuman/prettier-config@npm:^2.0.2":
+  version: 2.0.2
+  resolution: "@barelyhuman/prettier-config@npm:2.0.2"
+  bin:
+    prettier-config: cli.js
+  checksum: 10c0/210f575adb45eb695ffd81984d2f8d52376a713a6ab749cc24aa9f5faa1b7e14720377cb6fc0f4be55190c9e9ff1496dc6a192d47c1bab44d9e03b60ea627765
+  languageName: node
+  linkType: hard
+
 "@bcoe/v8-coverage@npm:^0.2.3":
   version: 0.2.3
   resolution: "@bcoe/v8-coverage@npm:0.2.3"
@@ -5034,6 +5043,7 @@ __metadata:
     "@babel/core": "npm:^7.25.2"
     "@babel/preset-env": "npm:^7.25.3"
     "@babel/runtime": "npm:^7.25.0"
+    "@barelyhuman/prettier-config": "npm:^2.0.2"
     "@react-native-async-storage/async-storage": "npm:^2.2.0"
     "@react-native-community/cli": "npm:20.0.0"
     "@react-native-community/cli-platform-android": "npm:20.0.0"
@@ -5060,7 +5070,7 @@ __metadata:
     fast-xml-parser: "npm:^5.2.5"
     jest: "npm:^29.6.3"
     nanoid: "npm:^5.1.5"
-    prettier: "npm:2.8.8"
+    prettier: "npm:^3.6.2"
     react: "npm:19.1.0"
     react-native: "npm:0.81.1"
     react-native-fs: "npm:^2.20.0"
@@ -7946,12 +7956,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:2.8.8":
-  version: 2.8.8
-  resolution: "prettier@npm:2.8.8"
+"prettier@npm:^3.6.2":
+  version: 3.6.2
+  resolution: "prettier@npm:3.6.2"
   bin:
-    prettier: bin-prettier.js
-  checksum: 10c0/463ea8f9a0946cd5b828d8cf27bd8b567345cf02f56562d5ecde198b91f47a76b7ac9eae0facd247ace70e927143af6135e8cf411986b8cb8478784a4d6d724a
+    prettier: bin/prettier.cjs
+  checksum: 10c0/488cb2f2b99ec13da1e50074912870217c11edaddedeadc649b1244c749d15ba94e846423d062e2c4c9ae683e2d65f754de28889ba06e697ac4f988d44f45812
   languageName: node
   linkType: hard
 

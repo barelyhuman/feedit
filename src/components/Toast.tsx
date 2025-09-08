@@ -1,33 +1,33 @@
-import { createContext, useContext, useState } from 'react';
-import { Portal, Snackbar } from 'react-native-paper';
+import { createContext, useContext, useState } from 'react'
+import { Portal, Snackbar } from 'react-native-paper'
 
 const ToastContext = createContext({
   visible: false,
   message: '',
   setMessage: (_: string) => {},
   setVisible: (_: boolean) => {},
-});
+})
 
 export const useToast = () => {
-  const { visible, message, setMessage, setVisible } = useContext(ToastContext);
+  const { visible, message, setMessage, setVisible } = useContext(ToastContext)
 
   return {
     visible,
     message,
     show(_message: string) {
-      setVisible(true);
-      setMessage(_message);
+      setVisible(true)
+      setMessage(_message)
       setTimeout(() => {
-        setVisible(false);
-        setMessage('');
-      }, 3000);
+        setVisible(false)
+        setMessage('')
+      }, 3000)
     },
-  };
-};
+  }
+}
 
 export const ToastContainer = () => {
-  const [visible, setVisible] = useState(false);
-  const [message, setMessage] = useState('');
+  const [visible, setVisible] = useState(false)
+  const [message, setMessage] = useState('')
 
   return (
     <ToastContext.Provider
@@ -41,7 +41,7 @@ export const ToastContainer = () => {
       <Portal>
         <Snackbar
           onDismiss={() => {
-            setVisible(false);
+            setVisible(false)
           }}
           visible={visible}
         >
@@ -49,5 +49,5 @@ export const ToastContainer = () => {
         </Snackbar>
       </Portal>
     </ToastContext.Provider>
-  );
-};
+  )
+}

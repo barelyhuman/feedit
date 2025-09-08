@@ -1,68 +1,67 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { StateStorage } from "zustand/middleware";
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { StateStorage } from 'zustand/middleware'
 
-
-const getStore = async (key) => {
+const getStore = async key => {
   try {
-    let store = "";
-    let numberOfParts = await AsyncStorage.getItem(key);
-    if (typeof numberOfParts === "undefined" || numberOfParts === null) {
-      return null;
+    let store = ''
+    let numberOfParts = await AsyncStorage.getItem(key)
+    if (typeof numberOfParts === 'undefined' || numberOfParts === null) {
+      return null
     } else {
-      numberOfParts = parseInt(numberOfParts);
+      numberOfParts = parseInt(numberOfParts)
     }
     for (let i = 0; i < numberOfParts; i++) {
-      store += await AsyncStorage.getItem(key + i);
+      store += await AsyncStorage.getItem(key + i)
     }
-    if (store === "") {
-      return null;
+    if (store === '') {
+      return null
     }
-    return JSON.parse(store);
+    return JSON.parse(store)
   } catch (error) {
-    console.log("Could not get [" + key + "] from store.");
-    console.log(error);
-    return null;
+    console.log('Could not get [' + key + '] from store.')
+    console.log(error)
+    return null
   }
-};
+}
 
 const saveStore = async (key, data) => {
   try {
-    const store = JSON.stringify(data).match(/.{1,1000000}/g);
+    const store = JSON.stringify(data).match(/.{1,1000000}/g)
     store.forEach((part, index) => {
-      AsyncStorage.setItem(key + index, part);
-    });
-    AsyncStorage.setItem(key, "" + store.length);
+      AsyncStorage.setItem(key + index, part)
+    })
+    AsyncStorage.setItem(key, '' + store.length)
   } catch (error) {
-    console.log("Could not save store : ");
-    console.log(error.message);
+    console.log('Could not save store : ')
+    console.log(error.message)
   }
-};
+}
 
-const clearStore = async (key) => {
+const clearStore = async key => {
   try {
-    console.log("Clearing store for [" + key + "]");
-    let numberOfParts = await AsyncStorage.getItem(key);
-    if (typeof numberOfParts !== "undefined" && numberOfParts !== null) {
-      numberOfParts = parseInt(numberOfParts);
+    console.log('Clearing store for [' + key + ']')
+    let numberOfParts = await AsyncStorage.getItem(key)
+    if (typeof numberOfParts !== 'undefined' && numberOfParts !== null) {
+      numberOfParts = parseInt(numberOfParts)
       for (let i = 0; i < numberOfParts; i++) {
-        AsyncStorage.removeItem(key + i);
+        AsyncStorage.removeItem(key + i)
       }
-      AsyncStorage.removeItem(key);
+      AsyncStorage.removeItem(key)
     }
   } catch (error) {
-    console.log("Could not clear store : ");
-    console.log(error.message);
+    console.log('Could not clear store : ')
+    console.log(error.message)
   }
-};
+}
 
 export const chunkAsyncStore: StateStorage = {
   async getItem(name) {
-    return getStore(name);
+    return getStore(name)
   },
   async setItem(name, value) {
-    return saveStore(name, value);
+    return saveStore(name, value)
   },
   async removeItem(name) {
-    return clearStore(name);
+    return clearStore(name)
   },
-};
+}

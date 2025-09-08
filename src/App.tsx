@@ -1,20 +1,18 @@
-import { StatusBar, useColorScheme } from 'react-native';
-import { PaperProvider } from 'react-native-paper';
-import Navigation from './navigation/Navigation';
-import { ToastContainer } from './components/Toast';
-import { useFeedStore } from './lib/store/feed';
-import { useEffect } from 'react';
+import { StatusBar, useColorScheme } from 'react-native'
+import { PaperProvider } from 'react-native-paper'
+import Navigation from './navigation/Navigation'
+import { ToastContainer } from './components/Toast'
+import { useFeedStore } from './lib/store/feed'
+import { useEffect } from 'react'
 
 const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+  const isDarkMode = useColorScheme() === 'dark'
 
-  const sequentialBackgroundSync = useFeedStore(
-    d => d.sequentialBackgroundSync,
-  );
+  const sequentialBackgroundSync = useFeedStore(d => d.sequentialBackgroundSync)
 
   useEffect(() => {
-    sequentialBackgroundSync();
-  }, [sequentialBackgroundSync]);
+    sequentialBackgroundSync()
+  }, [sequentialBackgroundSync])
 
   return (
     <PaperProvider>
@@ -22,7 +20,7 @@ const App = () => {
       <Navigation isDarkMode={isDarkMode} />
       <ToastContainer />
     </PaperProvider>
-  );
-};
+  )
+}
 
-export default App;
+export default App
