@@ -7,6 +7,6 @@
 
 ## Screenshots
 
-| Home                        | Single Feed                 |
-| --------------------------- | --------------------------- |
-| ![](./docs/assets/home.jpg) | ![](./docs/assets/feed.jpg) |
+| Home                        | Single Feed                 | Settings                       | Bookmark                        |
+| --------------------------- | --------------------------- | ------------------------------ | ------------------------------- |
+| ![](./docs/assets/home.jpg) | ![](./docs/assets/feed.jpg) | ![](./docs/assets/setting.jpg) | ![](./docs/assets/bookmark.jpg) |
