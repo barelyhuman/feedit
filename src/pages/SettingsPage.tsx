@@ -1,37 +1,39 @@
-import { pick, types } from '@react-native-documents/picker';
-import { useNavigation } from '@react-navigation/native';
-import { XMLParser } from 'fast-xml-parser';
-import { useCallback } from 'react';
-import { Linking, Touchable, TouchableHighlight, View } from 'react-native';
-import { version } from '../../package.json';
+import { pick, types } from "@react-native-documents/picker";
+import { useNavigation } from "@react-navigation/native";
+import { XMLParser } from "fast-xml-parser";
+import { useCallback } from "react";
+import { Alert, Linking, TouchableHighlight, View } from "react-native";
+import RNFS from "react-native-fs";
 import {
   Appbar,
   Button,
-  Card,
   Divider,
   List,
   ProgressBar,
   Text,
   useTheme,
-} from 'react-native-paper';
-import { useFeedStore } from '../lib/store/feed';
-import { useOpmlImportStore } from '../lib/store/opmlImportStore';
+} from "react-native-paper";
+import Share from "react-native-share";
+import { version } from "../../package.json";
+import { useFeedStore } from "../lib/store/feed";
+import { useOpmlImportStore } from "../lib/store/opmlImportStore";
 
 const SettingsPage = () => {
   const navigation = useNavigation();
   const theme = useTheme();
 
-  const total = useOpmlImportStore(s => s.total);
-  const imported = useOpmlImportStore(s => s.imported);
-  const isImporting = useOpmlImportStore(s => s.isImporting);
-  const error = useOpmlImportStore(s => s.error);
-  const startImport = useOpmlImportStore(s => s.startImport);
-  const updateProgress = useOpmlImportStore(s => s.updateProgress);
-  const finishImport = useOpmlImportStore(s => s.finishImport);
-  const setError = useOpmlImportStore(s => s.setError);
-  const addFeed = useFeedStore(state => state.addFeed);
-  const addToFailedItems = useOpmlImportStore(s => s.addToFailedItems);
-  const failedItems = useOpmlImportStore(s => s.failedItems);
+  const total = useOpmlImportStore((s) => s.total);
+  const imported = useOpmlImportStore((s) => s.imported);
+  const isImporting = useOpmlImportStore((s) => s.isImporting);
+  const error = useOpmlImportStore((s) => s.error);
+  const startImport = useOpmlImportStore((s) => s.startImport);
+  const updateProgress = useOpmlImportStore((s) => s.updateProgress);
+  const finishImport = useOpmlImportStore((s) => s.finishImport);
+  const setError = useOpmlImportStore((s) => s.setError);
+  const addFeed = useFeedStore((state) => state.addFeed);
+  const feeds = useFeedStore((s) => s.feeds);
+  const addToFailedItems = useOpmlImportStore((s) => s.addToFailedItems);
+  const failedItems = useOpmlImportStore((s) => s.failedItems);
 
   const handleImportOPML = useCallback(async () => {
     try {
@@ -44,7 +46,7 @@ const SettingsPage = () => {
       const response = await fetch(uri);
       const xmlText = await response.text();
       const parser = new XMLParser({
-        attributeNamePrefix: '',
+        attributeNamePrefix: "",
         ignoreAttributes: false,
         ignoreDeclaration: true,
         parseTagValue: true,
@@ -58,7 +60,7 @@ const SettingsPage = () => {
       for (const outline of outlines) {
         const url = outline.xmlUrl;
         if (url) {
-          await addFeed(url).catch(err => {
+          await addFeed(url).catch((err) => {
             console.error(err);
             addToFailedItems(url);
           });
@@ -68,7 +70,7 @@ const SettingsPage = () => {
       }
       finishImport();
     } catch (e: any) {
-      setError(e.message || 'Failed to import OPML');
+      setError(e.message || "Failed to import OPML");
     }
   }, [
     addFeed,
@@ -79,15 +81,68 @@ const SettingsPage = () => {
     setError,
   ]);
 
+  const escapeXml = (str: string | undefined) => {
+    if (!str) return "";
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+  };
+
+  const handleExportOPML = useCallback(async () => {
+    try {
+      if (!feeds || feeds.length === 0) {
+        Alert.alert("Export", "No feeds to export");
+        return;
+      }
+
+      const headTitle = "feedit export";
+      const outlines = feeds
+        .map((f) => {
+          const title = escapeXml(f.title || "");
+          const xmlUrl = escapeXml(f.feedUrl || "");
+          const htmlUrl = escapeXml(f.link || "");
+          return `  <outline text="${title}" title="${title}" type="rss" xmlUrl="${xmlUrl}" htmlUrl="${htmlUrl}"/>`;
+        })
+        .join("\n");
+
+      const opml =
+        `<?xml version="1.0" encoding="UTF-8"?>\n<opml version="1.0">\n<head>\n  <title>${
+          escapeXml(headTitle)
+        }</title>\n  <dateCreated>${
+          new Date().toUTCString()
+        }</dateCreated>\n</head>\n<body>\n${outlines}\n</body>\n</opml>`;
+
+      const filename = `feedit-${Date.now()}.opml`;
+      const path = `${RNFS.TemporaryDirectoryPath}/${filename}`;
+
+      await RNFS.writeFile(path, opml, "utf8");
+      await Share.open({
+        url: `file://${path}`,
+        type: "text/xml",
+        filename,
+      }).catch((err) => {
+        if (String(err).includes("User did not share")) {
+          return;
+        }
+        console.error("failed to share", err);
+      });
+    } catch (err: any) {
+      console.error("failed to share", err);
+    }
+  }, [feeds]);
+
   return (
     <View>
       <Appbar.Header>
         <Appbar.BackAction
           onPress={() => {
-            navigation.navigate({ name: 'Home' });
+            navigation.navigate({ name: "Home" });
           }}
         />
-        <Appbar.Content title={'Settings'} />
+        <Appbar.Content title={"Settings"} />
       </Appbar.Header>
       <View>
         <View style={{ margin: 20, marginBottom: 30 }}>
@@ -112,45 +167,55 @@ const SettingsPage = () => {
           >
             Import Feeds from OPML
           </Button>
+          <Button
+            mode="outlined"
+            onPress={handleExportOPML}
+            disabled={isImporting}
+            style={{ marginTop: 12 }}
+          >
+            Export Feeds as OPML
+          </Button>
           {error && (
             <Text style={{ color: theme.colors.error, marginTop: 16 }}>
               {error}
             </Text>
           )}
-          {!isImporting && failedItems.length > 0 ? (
-            <>
-              <Text style={{ color: theme.colors.error, marginTop: 16 }}>
-                The following failed to import
-              </Text>
-              <View>
-                {failedItems.map(d => {
-                  return <List.Item title={d} />;
-                })}
-              </View>
-            </>
-          ) : null}
+          {!isImporting && failedItems.length > 0
+            ? (
+              <>
+                <Text style={{ color: theme.colors.error, marginTop: 16 }}>
+                  The following failed to import
+                </Text>
+                <View>
+                  {failedItems.map((d) => {
+                    return <List.Item title={d} />;
+                  })}
+                </View>
+              </>
+            )
+            : null}
         </View>
         <Divider />
         <View
           style={{
             margin: 20,
             marginBottom: 30,
-            alignItems: 'center',
-            justifyContent: 'center',
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <Text style={{ color: theme.colors.secondary }}>
             App Version: {version}
           </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text>Made by </Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text>Made by{" "}</Text>
             <TouchableHighlight
               style={{
                 margin: 0,
                 padding: 0,
               }}
               onPress={() => {
-                Linking.openURL('https://reaper.is');
+                Linking.openURL("https://reaper.is");
               }}
             >
               <Text style={{ color: theme.colors.primary }}>reaper</Text>
@@ -164,18 +229,18 @@ const SettingsPage = () => {
 
 export default SettingsPage;
 
-const getOutlines = xml => {
-  const outlines = [];
-  xml.forEach(xmlNode => {
+const getOutlines = (xml: any[]) => {
+  const outlines: { xmlUrl: string }[] = [];
+  xml.forEach((xmlNode) => {
     const opmlNodes = xmlNode.opml || [];
-    opmlNodes.forEach(opmlNode => {
+    opmlNodes.forEach((opmlNode: { body?: any[] }) => {
       const body = opmlNode.body || [];
-      body.forEach(bodyNode => {
-        if ('outline' in bodyNode) {
-          const allAttrKeys = Object.keys(bodyNode[':@']);
+      body.forEach((bodyNode) => {
+        if ("outline" in bodyNode) {
+          const allAttrKeys = Object.keys(bodyNode[":@"]);
           const outline = Object.fromEntries(
-            allAttrKeys.map(d => {
-              return [d, bodyNode[':@'][d]];
+            allAttrKeys.map((d) => {
+              return [d, bodyNode[":@"][d]];
             }),
           );
           outlines.push(outline);
