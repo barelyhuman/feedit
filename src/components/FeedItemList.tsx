@@ -1,12 +1,16 @@
-import { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import {
-  Divider,
   IconButton,
   List,
   Menu,
   Text,
   useTheme,
+  Portal,
+  Modal,
+  Card,
+  TextInput,
+  Button,
 } from "react-native-paper";
 import { useBookmarkStore } from "../lib/store/bookmarks";
 import { useFeedStore } from "../lib/store/feed";
@@ -19,38 +23,135 @@ const DateFmt = Intl.DateTimeFormat("en-GB", {
 });
 
 const FeedItemList = ({ feedId }: { feedId: string }) => {
-  // navigation not used
   const feed = useFeedStore((state) =>
     state.feeds.find((f) => f.id === feedId)
   );
   const markItemUnread = useFeedStore((state) => state.markItemUnread);
   const syncFeed = useFeedStore((state) => state.syncFeed);
+  const updateFeedUrl = useFeedStore((state: any) => state.updateFeedUrl);
   const toggleBookmark = useBookmarkStore((state) => state.toggleBookmark);
   const isInBookmark = useBookmarkStore((state) => state.isInBookmark);
-  // menu is handled per-row now
   const toast = useToast();
+  const [editVisible, setEditVisible] = useState(false);
+  const [editUrl, setEditUrl] = useState("");
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState("");
+  const theme = useTheme();
+
+  useEffect(() => {
+    setEditUrl(feed?.feedUrl ?? "");
+    setEditError("");
+  }, [feed?.feedUrl]);
+
+  const isFeedLoading = feed?.isLoading ?? false;
+
+  const validateAndUpdateFeedUrl = async () => {
+    const trimmed = (editUrl || "").trim();
+    if (!trimmed) {
+      setEditError("Please enter a URL.");
+      return;
+    }
+    setEditLoading(true);
+    setEditError("");
+    try {
+      const res = await fetch(trimmed);
+      const txt = await res.text();
+      const lower = txt.toLowerCase();
+      if (lower.includes("<rss") || lower.includes("<feed")) {
+        if (typeof updateFeedUrl === "function") {
+          updateFeedUrl(feedId, trimmed);
+          toast.show("Feed URL updated");
+        } else {
+          console.warn("updateFeedUrl not implemented in feed store");
+          toast.show("Feed URL updated locally");
+        }
+        setEditVisible(false);
+      } else {
+        setEditError("URL does not contain valid RSS data.");
+      }
+    } catch (e) {
+      setEditError("Failed to fetch or parse RSS feed.");
+    } finally {
+      setEditLoading(false);
+    }
+  };
+  const onRefresh = useCallback(() => syncFeed(feedId), [syncFeed, feedId]);
+
+  const renderItem = useCallback(
+    ({ item }: { item: any }) => (
+      <FeedItemRow
+        item={item}
+        feedId={feedId}
+        markItemUnread={markItemUnread}
+        toggleBookmark={toggleBookmark}
+        isInBookmark={isInBookmark}
+        openToast={toast}
+      />
+    ),
+    [feedId, markItemUnread, toggleBookmark, isInBookmark, toast]
+  );
+
   if (!feed) return <></>;
-  const isFeedLoading = feed.isLoading;
+
   return (
-    <FlatList
-      refreshing={isFeedLoading}
-      data={feed.items}
-      keyExtractor={(it) => it.id}
-      onRefresh={() => {
-        syncFeed(feedId);
-      }}
-      ListEmptyComponent={!isFeedLoading ? <Text>No Items</Text> : <></>}
-      renderItem={({ item }) => (
-        <FeedItemRow
-          item={item}
-          feedId={feedId}
-          markItemUnread={markItemUnread}
-          toggleBookmark={toggleBookmark}
-          isInBookmark={isInBookmark}
-          openToast={toast}
+    <>      
+      <View style={styles.headerRow}>
+        <Text numberOfLines={1} style={styles.headerText}>
+          RSS URL: {feed.feedUrl}
+        </Text>
+        <IconButton
+          icon="pencil"
+          size={20}
+            onPress={() => {
+            setEditUrl(feed.feedUrl ?? "");
+            setEditError("");
+            setEditVisible(true);
+          }}
         />
-      )}
-    />
+      </View>
+
+      <Portal>
+        <Modal visible={editVisible} onDismiss={() => setEditVisible(false)}>
+          <Card style={styles.card}>
+            <Card.Title title="Edit Feed URL" />
+            <Card.Content>
+              <TextInput
+                mode="outlined"
+                label="Feed URL"
+                placeholder="https://example.com/rss.xml"
+                value={editUrl}
+                onChangeText={setEditUrl}
+                error={!!editError}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              {editError ? (
+                <Text style={[styles.errorText, { color: theme.colors.error }]}>
+                  {editError}
+                </Text>
+              ) : null}
+            </Card.Content>
+            <Card.Actions style={styles.cardActions}>
+              <Button onPress={() => setEditVisible(false)} disabled={editLoading}>
+                Cancel
+              </Button>
+              <Button onPress={validateAndUpdateFeedUrl} loading={editLoading} disabled={editLoading}>
+                Save
+              </Button>
+            </Card.Actions>
+          </Card>
+        </Modal>
+      </Portal>
+
+      <FlatList
+        refreshing={isFeedLoading}
+        data={feed.items}
+        keyExtractor={(it) => it.id}
+        onRefresh={onRefresh}
+        ListEmptyComponent={!isFeedLoading ? <Text>No Items</Text> : <></>}
+        renderItem={renderItem}
+      />
+    </>
   );
 };
 
@@ -77,14 +178,7 @@ const FeedItemRow = ({
         style={styles.pressable}
       >
         <View style={styles.row}>
-          <FeedUnreadDot
-            style={{
-              marginTop: 10,
-              alignSelf: "start",
-            }}
-            unread={!!item.unread}
-            theme={theme}
-          />
+          <FeedUnreadDot style={styles.unreadDot} unread={!!item.unread} theme={theme} />
           <View style={styles.content}>
             <Text numberOfLines={1}>{item.title}</Text>
             <Text style={styles.desc} numberOfLines={1}>
@@ -100,10 +194,7 @@ const FeedItemRow = ({
           </View>
           <Menu
             visible={open}
-            onDismiss={() => {
-              console.log("Dismissed")
-              setOpen(false)
-            }}
+            onDismiss={() => setOpen(false)}
             anchor={
               <IconButton
                 icon="dots-vertical"
@@ -145,6 +236,17 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", paddingHorizontal: 12 },
   content: { flex: 1, paddingHorizontal: 8 },
   desc: { color: "#666", fontSize: 12 },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  headerText: { flex: 1, fontSize: 14, fontWeight: "500" },
+  card: { margin: 16 },
+  cardActions: { justifyContent: "flex-end" },
+  errorText: { marginTop: 8 },
+  unreadDot: { marginTop: 10, alignSelf: "flex-start" },
 });
 
 export default FeedItemList;
