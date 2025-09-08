@@ -5,6 +5,7 @@ set -e
 if [ -f package.json ]; then
   echo "Installing JS dependencies..."
   yarn install || npm install
+  yarn patch-package
 fi
 
 # Navigate to android folder
