@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import {
+  Button,
+  Card,
   IconButton,
   List,
   Menu,
-  Text,
-  useTheme,
-  Portal,
   Modal,
-  Card,
+  Portal,
+  Text,
   TextInput,
-  Button,
+  useTheme,
 } from "react-native-paper";
 import { useBookmarkStore } from "../lib/store/bookmarks";
 import { useFeedStore } from "../lib/store/feed";
@@ -88,13 +88,13 @@ const FeedItemList = ({ feedId }: { feedId: string }) => {
         openToast={toast}
       />
     ),
-    [feedId, markItemUnread, toggleBookmark, isInBookmark, toast]
+    [feedId, markItemUnread, toggleBookmark, isInBookmark, toast],
   );
 
   if (!feed) return <></>;
 
   return (
-    <>      
+    <>
       <View style={styles.headerRow}>
         <Text numberOfLines={1} style={styles.headerText}>
           RSS URL: {feed.feedUrl}
@@ -102,7 +102,7 @@ const FeedItemList = ({ feedId }: { feedId: string }) => {
         <IconButton
           icon="pencil"
           size={20}
-            onPress={() => {
+          onPress={() => {
             setEditUrl(feed.feedUrl ?? "");
             setEditError("");
             setEditVisible(true);
@@ -125,17 +125,28 @@ const FeedItemList = ({ feedId }: { feedId: string }) => {
                 autoCapitalize="none"
                 autoCorrect={false}
               />
-              {editError ? (
-                <Text style={[styles.errorText, { color: theme.colors.error }]}>
-                  {editError}
-                </Text>
-              ) : null}
+              {editError
+                ? (
+                  <Text
+                    style={[styles.errorText, { color: theme.colors.error }]}
+                  >
+                    {editError}
+                  </Text>
+                )
+                : null}
             </Card.Content>
             <Card.Actions style={styles.cardActions}>
-              <Button onPress={() => setEditVisible(false)} disabled={editLoading}>
+              <Button
+                onPress={() => setEditVisible(false)}
+                disabled={editLoading}
+              >
                 Cancel
               </Button>
-              <Button onPress={validateAndUpdateFeedUrl} loading={editLoading} disabled={editLoading}>
+              <Button
+                onPress={validateAndUpdateFeedUrl}
+                loading={editLoading}
+                disabled={editLoading}
+              >
                 Save
               </Button>
             </Card.Actions>
@@ -178,7 +189,11 @@ const FeedItemRow = ({
         style={styles.pressable}
       >
         <View style={styles.row}>
-          <FeedUnreadDot style={styles.unreadDot} unread={!!item.unread} theme={theme} />
+          <FeedUnreadDot
+            style={styles.unreadDot}
+            unread={!!item.unread}
+            theme={theme}
+          />
           <View style={styles.content}>
             <Text numberOfLines={1}>{item.title}</Text>
             <Text style={styles.desc} numberOfLines={1}>
@@ -199,13 +214,22 @@ const FeedItemRow = ({
               <IconButton
                 icon="dots-vertical"
                 size={20}
-                onPress={() => setOpen(true)}
+                onPress={() => {
+                  setOpen(true);
+                }}
               />
             }
           >
-            <Menu.Item onPress={async () => openUrl(item.link)} title="Open" />
             <Menu.Item
-              onPress={() => {
+              onPress={async (e) => {
+                e.stopPropagation();
+                openUrl(item.link);
+              }}
+              title="Open"
+            />
+            <Menu.Item
+              onPress={(e) => {
+                e.stopPropagation();
                 const added = toggleBookmark(feedId, item.id);
                 const msg = `${added ? "Added" : "Removed"} from bookmarks`;
                 openToast.show(msg);
@@ -216,11 +240,12 @@ const FeedItemRow = ({
               } Bookmarks`}
             />
             <Menu.Item
-              onPress={() => {
-                markItemUnread(feedId, item.id, false);
+              onPress={(e) => {
+                e.stopPropagation();
+                markItemUnread(feedId, item.id, !item.unread);
                 setOpen(false);
               }}
-              title="Mark as Read"
+              title={`Mark as ${item.unread ? "read" : "unread"}`}
             />
           </Menu>
         </View>
