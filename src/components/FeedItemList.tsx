@@ -203,6 +203,7 @@ const FeedItemRow = ({
           </View>
           <Menu
             visible={open}
+            elevation={4}
             onDismiss={() => setOpen(false)}
             anchor={
               <IconButton
