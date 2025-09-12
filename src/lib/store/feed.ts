@@ -99,7 +99,7 @@ export const useFeedStore = create<FeedState>()(
               .map((x) => {
                 const existingItem = d.items.find((y) => y.id === x.id);
                 return Object.assign({}, existingItem, x, {
-                  unread: existingItem?.unread,
+                  unread: existingItem?.unread ?? true,
                 });
               })
               .sort(sortByPublished);
@@ -127,7 +127,7 @@ export const useFeedStore = create<FeedState>()(
             .map((x) => {
               const existingItem = feedItem.items.find((y) => y.id === x.id);
               return Object.assign({}, existingItem, x, {
-                unread: existingItem?.unread,
+                unread: existingItem?.unread ?? true,
               });
             })
             .sort(sortByPublished);
@@ -153,14 +153,13 @@ export const useFeedStore = create<FeedState>()(
 
         const rssText = await fetch(currentFeed.feedUrl).then((d) => d.text());
         const feed = parseRSS(rssText, currentFeed.feedUrl);
-        console.log({ feed });
 
         const mergedItems = feed.items.map((d) => {
           const currentItemState = currentFeed.items.find((x) => x.id === d.id);
           return {
             ...currentItemState,
             ...d,
-            unread: currentItemState?.unread,
+            unread: currentItemState?.unread ?? true ,
           };
         }).sort(sortByPublished);
 
