@@ -1,0 +1,21 @@
+# frozen_string_literal: true
+
+default_platform :android
+
+platform :android do
+  desc 'Build the Android application.'
+  lane :build do
+    gradle(task: 'clean', project_dir: 'android/')
+    gradle(task: 'assemble', build_type: 'Release', project_dir: 'android/')
+
+    artifacts = []
+    if lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
+      artifacts << lane_context[SharedValues::GRADLE_APK_OUTPUT_PATH]
+    end
+
+    copy_artifacts(
+      target_path: './dist/android',
+      artifacts: artifacts
+    )
+  end
+end
