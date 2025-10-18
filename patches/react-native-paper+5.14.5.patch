@@ -1,31 +1,38 @@
 diff --git a/node_modules/react-native-paper/src/components/Menu/Menu.tsx b/node_modules/react-native-paper/src/components/Menu/Menu.tsx
-index 55922c1..e2ae9e7 100644
+index 55922c1..9b53403 100644
 --- a/node_modules/react-native-paper/src/components/Menu/Menu.tsx
 +++ b/node_modules/react-native-paper/src/components/Menu/Menu.tsx
-@@ -20,6 +20,7 @@ import {
- } from 'react-native';
+@@ -359,11 +359,9 @@ const Menu = ({
+         easing: EASING,
+         useNativeDriver: true,
+       }),
+-    ]).start(({ finished }) => {
+-      if (finished) {
+-        focusFirstDOMNode(menuRef.current);
+-        prevRendered.current = true;
+-      }
++    ]).start(() => {
++      focusFirstDOMNode(menuRef.current);
++      prevRendered.current = true;
+     });
+   }, [anchor, attachListeners, measureAnchorLayout, theme]);
  
- import { useSafeAreaInsets } from 'react-native-safe-area-context';
-+import useLatestCallback from "use-latest-callback"
- 
- import MenuItem from './MenuItem';
- import { useInternalTheme } from '../../core/theming';
-@@ -387,7 +388,7 @@ const Menu = ({
+@@ -377,13 +375,11 @@ const Menu = ({
+       duration: ANIMATION_DURATION * animation.scale,
+       easing: EASING,
+       useNativeDriver: true,
+-    }).start(({ finished }) => {
+-      if (finished) {
+-        setMenuLayout({ width: 0, height: 0 });
+-        setRendered(false);
+-        prevRendered.current = false;
+-        focusFirstDOMNode(anchorRef.current);
+-      }
++    }).start(() => {
++      setMenuLayout({ width: 0, height: 0 });
++      setRendered(false);
++      prevRendered.current = false;
++      focusFirstDOMNode(anchorRef.current);
      });
    }, [removeListeners, theme]);
  
--  const updateVisibility = React.useCallback(
-+  const updateVisibility = useLatestCallback(
-     async (display: boolean) => {
-       // Menu is rendered in Portal, which updates items asynchronously
-       // We need to do the same here so that the ref is up-to-date
-@@ -403,8 +404,7 @@ const Menu = ({
- 
-         return;
-       });
--    },
--    [hide, show]
-+    }
-   );
- 
-   React.useEffect(() => {
