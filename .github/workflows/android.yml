@@ -9,11 +9,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-
-      - name: Set Up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: "20"
+      - uses: jdx/mise-action@v3
 
       - name: Cache Gradle
         uses: actions/cache@v4
@@ -21,24 +17,31 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/gradle.properties') }}
+          key:
+            gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties',
+            '**/gradle.properties') }}
           restore-keys: |
             gradle-
 
       - name: Set Up JDK
         uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
-          distribution: "temurin"
+          distribution: 'temurin'
           java-version: 17
 
-      - name: Build Project
+      - name: Install
         run: |
           npm i -g corepack@latest
           corepack enable
-          bash ${GITHUB_WORKSPACE}/scripts/build-apk.sh
+          yarn
+          bundle install
+
+      - name: Build Project
+        run: |
+          bundle exec fastlane android build
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: feedit-apk
-          path: android/app/build/outputs/apk/**/*.apk
+          path: ./dist/android/*.apk
