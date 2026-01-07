@@ -38,6 +38,9 @@ type FeedState = {
   updateFeedUrl: (feedId: string, url: string) => Promise<void>;
 };
 
+let isSyncingAll = false;
+const syncingFeeds = new Set<string>();
+
 export const useFeedStore = create<FeedState>()(
   persist(
     (set, get) => ({
@@ -85,37 +88,46 @@ export const useFeedStore = create<FeedState>()(
         }));
       },
       syncAll: async () => {
-        set((s) => ({
-          feeds: s.feeds.map((d) => ({ ...d, isLoading: true })),
-        }));
+        if (isSyncingAll) {
+          return;
+        }
+        isSyncingAll = true;
 
-        const feeds = await Promise.all(
-          get().feeds.map(async (d) => {
-            if (!d.feedUrl) return;
-            const response = await fetch(d.feedUrl).then((res) => res.text());
-            const feed = parseRSS(response, d.feedUrl);
+        try {
+          set((s) => ({
+            feeds: s.feeds.map((d) => ({ ...d, isLoading: true })),
+          }));
 
-            const items = feed.items
-              .map((x) => {
-                const existingItem = d.items.find((y) => y.id === x.id);
-                return Object.assign({}, existingItem, x, {
-                  unread: existingItem?.unread ?? true,
-                });
-              })
-              .sort(sortByPublished);
+          const feeds = await Promise.all(
+            get().feeds.map(async (d) => {
+              if (!d.feedUrl) return;
+              const response = await fetch(d.feedUrl).then((res) => res.text());
+              const feed = parseRSS(response, d.feedUrl);
 
-            return {
-              ...feed,
-              id: d.id,
-              feedUrl: d.feedUrl,
-              isLoading: false,
-              items: items,
-            };
-          }),
-        );
-        set({
-          feeds: feeds as any,
-        });
+              const items = feed.items
+                .map((x) => {
+                  const existingItem = d.items.find((y) => y.id === x.id);
+                  return Object.assign({}, existingItem, x, {
+                    unread: existingItem?.unread ?? true,
+                  });
+                })
+                .sort(sortByPublished);
+
+              return {
+                ...feed,
+                id: d.id,
+                feedUrl: d.feedUrl,
+                isLoading: false,
+                items: items,
+              };
+            }),
+          );
+          set({
+            feeds: feeds as any,
+          });
+        } finally {
+          isSyncingAll = false;
+        }
       },
       sequentialBackgroundSync: async () => {
         for (const feedItem of get().feeds) {
@@ -148,32 +160,53 @@ export const useFeedStore = create<FeedState>()(
         }
       },
       syncFeed: async (id) => {
+        if (syncingFeeds.has(id)) {
+          return;
+        }
+        
         const currentFeed = get().feeds.find((d) => d.id === id);
         if (!currentFeed) return;
+        
+        syncingFeeds.add(id);
 
-        const rssText = await fetch(currentFeed.feedUrl).then((d) => d.text());
-        const feed = parseRSS(rssText, currentFeed.feedUrl);
+        try {
+          set((state) => ({
+            feeds: state.feeds.map((f) =>
+              f.id === id
+                ? {
+                  ...f,
+                  isLoading: true,
+                }
+                : f
+            ) as Feed[],
+          }));
 
-        const mergedItems = feed.items.map((d) => {
-          const currentItemState = currentFeed.items.find((x) => x.id === d.id);
-          return {
-            ...currentItemState,
-            ...d,
-            unread: currentItemState?.unread ?? true ,
-          };
-        }).sort(sortByPublished);
+          const rssText = await fetch(currentFeed.feedUrl).then((d) => d.text());
+          const feed = parseRSS(rssText, currentFeed.feedUrl);
 
-        set((state) => ({
-          feeds: state.feeds.map((f) =>
-            f.id === id
-              ? {
-                ...currentFeed,
-                items: mergedItems,
-                isLoading: false,
-              }
-              : f
-          ) as Feed[],
-        }));
+          const mergedItems = feed.items.map((d) => {
+            const currentItemState = currentFeed.items.find((x) => x.id === d.id);
+            return {
+              ...currentItemState,
+              ...d,
+              unread: currentItemState?.unread ?? true,
+            };
+          }).sort(sortByPublished);
+
+          set((state) => ({
+            feeds: state.feeds.map((f) =>
+              f.id === id
+                ? {
+                  ...currentFeed,
+                  items: mergedItems,
+                  isLoading: false,
+                }
+                : f
+            ) as Feed[],
+          }));
+        } finally {
+          syncingFeeds.delete(id);
+        }
       },
       async updateFeedUrl(feedId: string, url: string) {
         set((state) => ({
