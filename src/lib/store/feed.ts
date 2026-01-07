@@ -92,7 +92,7 @@ export const useFeedStore = create<FeedState>()(
         const feeds = await Promise.all(
           get().feeds.map(async (d) => {
             if (!d.feedUrl) return;
-            const response = await fetch(d.feedUrl).then((d) => d.text());
+            const response = await fetch(d.feedUrl).then((res) => res.text());
             const feed = parseRSS(response, d.feedUrl);
 
             const items = feed.items
@@ -196,7 +196,7 @@ export const useFeedStore = create<FeedState>()(
       partialize: (state) => ({
         feeds: state.feeds,
       }),
-      onRehydrateStorage: (state) => {
+      onRehydrateStorage: () => {
         return (_, error) => {
           if (error) {
             console.error(error);

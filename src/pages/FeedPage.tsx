@@ -1,4 +1,3 @@
-import { View } from 'react-native'
 import { Appbar, Text } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native'
 import { useFeedStore } from '../lib/store/feed'
