@@ -8,7 +8,7 @@ const getStore = async key => {
     if (typeof numberOfParts === 'undefined' || numberOfParts === null) {
       return null
     } else {
-      numberOfParts = parseInt(numberOfParts)
+      numberOfParts = parseInt(numberOfParts, 10)
     }
     for (let i = 0; i < numberOfParts; i++) {
       store += await AsyncStorage.getItem(key + i)
@@ -42,7 +42,7 @@ const clearStore = async key => {
     console.log('Clearing store for [' + key + ']')
     let numberOfParts = await AsyncStorage.getItem(key)
     if (typeof numberOfParts !== 'undefined' && numberOfParts !== null) {
-      numberOfParts = parseInt(numberOfParts)
+      numberOfParts = parseInt(numberOfParts, 10)
       for (let i = 0; i < numberOfParts; i++) {
         AsyncStorage.removeItem(key + i)
       }

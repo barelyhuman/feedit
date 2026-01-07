@@ -26,7 +26,7 @@ export const useBookmarkStore = create<BookmarkStore>()(
         if (exists) {
           set(state => ({
             bookmarks: state.bookmarks.filter(
-              d => !(d.feedId === feedId && d.itemId == itemId)
+              d => !(d.feedId === feedId && d.itemId === itemId)
             ),
           }))
           return false
