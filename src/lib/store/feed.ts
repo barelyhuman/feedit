@@ -120,10 +120,10 @@ export const useFeedStore = create<FeedState>()(
                 feeds: state.feeds.map(existingFeed => {
                   return existingFeed.id === feedItem.id
                     ? {
-                        ...existingFeed,
-                        ...feed,
                         id: feedItem.id,
+                        title: feed.title || feedItem.title,
                         feedUrl: feedItem.feedUrl,
+                        link: feed.link || feedItem.link,
                         isLoading: false,
                         items: items,
                       }
