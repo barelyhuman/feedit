@@ -163,12 +163,13 @@ export const useFeedStore = create<FeedState>()(
         if (syncingFeeds.has(id)) {
           return;
         }
+        
+        const currentFeed = get().feeds.find((d) => d.id === id);
+        if (!currentFeed) return;
+        
         syncingFeeds.add(id);
 
         try {
-          const currentFeed = get().feeds.find((d) => d.id === id);
-          if (!currentFeed) return;
-
           set((state) => ({
             feeds: state.feeds.map((f) =>
               f.id === id
@@ -188,7 +189,7 @@ export const useFeedStore = create<FeedState>()(
             return {
               ...currentItemState,
               ...d,
-              unread: currentItemState?.unread ?? true ,
+              unread: currentItemState?.unread ?? true,
             };
           }).sort(sortByPublished);
 
