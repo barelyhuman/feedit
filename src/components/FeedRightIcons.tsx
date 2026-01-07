@@ -2,6 +2,7 @@ import { Animated, View } from 'react-native'
 import Icon from '@react-native-vector-icons/material-design-icons'
 import { Badge, List } from 'react-native-paper'
 import styles from '../styles/styles'
+import { useFeedStore } from '../lib/store/feed'
 
 const FeedRightIcons = ({
   feed,
@@ -10,7 +11,7 @@ const FeedRightIcons = ({
   theme,
   ...props
 }: any) => {
-  const feedUnreadCount = feed.items.filter((i: any) => i.unread).length
+  const feedUnreadCount = useFeedStore(state => state.getUnreadCount(feed.id))
   return (
     <View style={styles.rowCenter}>
       {feed.isLoading ? (
@@ -18,7 +19,7 @@ const FeedRightIcons = ({
           <Icon color={theme.colors.primary} name="loading" />
         </Animated.View>
       ) : feedUnreadCount > 0 ? (
-        <Badge>{feed.items.filter((i: any) => i.unread).length}</Badge>
+        <Badge>{feedUnreadCount}</Badge>
       ) : null}
       {!multiSelect && <List.Icon {...props} icon="arrow-right" />}
     </View>
