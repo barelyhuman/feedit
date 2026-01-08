@@ -18,10 +18,11 @@ feedit is a minimal RSS feed reader app built with React Native. The app allows 
 ## Code Style and Formatting
 
 ### Prettier Configuration
-- Configuration extends: `@barelyhuman/prettier-config` with overrides:
+- Defined in `.prettierrc.js`:
   - `singleQuote: true` - Use single quotes for strings
   - `arrowParens: 'avoid'` - Avoid parentheses around single arrow function parameters (e.g., `x => x + 1`)
   - `trailingComma: 'all'` - Add trailing commas wherever possible
+- Base configuration referenced in package.json: `@barelyhuman/prettier-config` (overridden by local config)
 
 ### ESLint Configuration
 - Extends: `@react-native`
@@ -73,8 +74,10 @@ src/
 - Store definitions are in `src/lib/store/`
 
 ### Navigation
-- Use React Navigation v7 with typed navigation
-- Access navigation with: `const navigation = useNavigation()`
+- Uses React Navigation v7 with static navigation API
+- Navigation is configured with `createStaticNavigation()` in `src/navigation/Navigation.tsx`
+- Navigators are defined with `createNativeStackNavigator()` and `createBottomTabNavigator()`
+- Within components, use `useNavigation()` hook to access navigation: `const navigation = useNavigation()`
 - Navigate with: `navigation.navigate({ name: 'ScreenName', params: { ... } })`
 
 ### Styling
