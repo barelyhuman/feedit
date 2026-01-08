@@ -1,5 +1,9 @@
 # Copilot Instructions for feedit
 
+## Codebase Reference
+
+For detailed source code context, refer to `codebase.md` in the repository root. This file contains a compressed representation of the entire codebase and should be used when you need detailed implementation context but have limited token availability.
+
 ## Project Overview
 
 feedit is a minimal RSS feed reader app built with React Native. The app allows users to add RSS feeds, view feed items, bookmark articles, and manage their subscriptions. The project is currently under heavy development.
