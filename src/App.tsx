@@ -8,11 +8,11 @@ import { useEffect } from 'react'
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark'
 
-  const sequentialBackgroundSync = useFeedStore(d => d.sequentialBackgroundSync)
+  const syncAll = useFeedStore(d => d.syncAll)
 
   useEffect(() => {
-    sequentialBackgroundSync()
-  }, [sequentialBackgroundSync])
+    syncAll()
+  }, [syncAll])
 
   return (
     <PaperProvider>
