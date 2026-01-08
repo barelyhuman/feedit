@@ -10,6 +10,7 @@ feedit is a minimal RSS feed reader app built with React Native. The app allows 
 - **Language**: TypeScript
 - **UI Library**: React Native Paper
 - **State Management**: Zustand
+- **Storage**: React Native AsyncStorage with custom chunked implementation
 - **Navigation**: React Navigation v7 (Stack and Bottom Tabs)
 - **Testing**: Jest with React Test Renderer
 - **Build Tools**: Fastlane (Android), Metro bundler
@@ -72,6 +73,11 @@ src/
 - Use Zustand for global state management
 - Access store with hooks: `const value = useFeedStore(state => state.value)`
 - Store definitions are in `src/lib/store/`
+- **Persistent Storage**: Uses `@react-native-async-storage/async-storage` with a custom chunked implementation (`chunkAsyncStore`)
+  - The `chunkAsyncStore` utility (in `src/lib/chunkAsyncStore.ts`) splits large data into 1MB chunks to prevent data loss
+  - This prevents hitting AsyncStorage size limits and ensures data persistence
+  - Used with Zustand's `persist` middleware via `createJSONStorage(() => chunkAsyncStore)`
+  - **IMPORTANT**: Always use `chunkAsyncStore` instead of direct AsyncStorage for Zustand persistence to avoid data loss
 
 ### Navigation
 - Uses React Navigation v7 with static navigation API
