@@ -10,7 +10,7 @@ feedit is a minimal RSS feed reader app built with React Native. The app allows 
 - **Language**: TypeScript
 - **UI Library**: React Native Paper
 - **State Management**: Zustand
-- **Navigation**: React Navigation (Stack and Bottom Tabs)
+- **Navigation**: React Navigation v7 (Stack and Bottom Tabs)
 - **Testing**: Jest with React Test Renderer
 - **Build Tools**: Fastlane (Android), Metro bundler
 - **Package Manager**: Yarn 4.9.4
@@ -18,11 +18,11 @@ feedit is a minimal RSS feed reader app built with React Native. The app allows 
 ## Code Style and Formatting
 
 ### Prettier Configuration
-- Defined in `.prettierrc.js`:
+- Defined in `.prettierrc.js` (overrides specific properties from base config):
   - `singleQuote: true` - Use single quotes for strings
   - `arrowParens: 'avoid'` - Avoid parentheses around single arrow function parameters (e.g., `x => x + 1`)
   - `trailingComma: 'all'` - Add trailing commas wherever possible
-- Base configuration referenced in package.json: `@barelyhuman/prettier-config` (overridden by local config)
+- Base configuration referenced in package.json: `@barelyhuman/prettier-config`
 
 ### ESLint Configuration
 - Extends: `@react-native`
@@ -129,7 +129,7 @@ yarn prepare          # Run patch-package after install
 - Builds use Fastlane
 - Output APKs go to `./dist/android/`
 - Uses Gradle for native builds
-- Requires JDK 18 (configured in mise.toml)
+- Requires Java 18 (configured in mise.toml)
 
 ### iOS
 - React Native 0.81.1 compatible
