@@ -9,7 +9,10 @@ import {
   Text,
   useTheme,
 } from 'react-native-paper'
-import { useFeedStore } from '../lib/store/feed'
+import { eq } from 'drizzle-orm'
+import { db } from '../lib/db'
+import { feeds as feedsTable, feedItems as feedItemsTable } from '../lib/db/schema'
+import { parseRSS, sortByPublished, useFeedStore } from '../lib/store/feed'
 import styles from '../styles/styles'
 
 const AddFeedFAB = () => {
@@ -18,7 +21,7 @@ const AddFeedFAB = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const theme = useTheme()
-  const addFeed = useFeedStore(state => state.addFeed)
+  const hydrateFeed = useFeedStore(d => d.hydrate)
   const showModal = () => {
     setError('')
     setVisible(true)
@@ -33,20 +36,53 @@ const AddFeedFAB = () => {
     setLoading(true)
     setError('')
     try {
-      const response = await fetch(url.trim())
-      const text = await response.text()
-      if (text.includes('<rss') || text.includes('<feed')) {
-        addFeed(url.trim())
+      const text = await fetch(url.trim()).then(r => r.text())
+      if (!text.includes('<rss') && !text.includes('<feed')) {
+        setError('URL does not contain valid RSS data.')
+        return
+      }
+
+      const existing = await db.select().from(feedsTable)
+        .where(eq(feedsTable.feedUrl, url.trim())).get()
+      if (existing) {
         setUrl('')
         hideModal()
-      } else {
-        setError('URL does not contain valid RSS data.')
+        return
       }
+
+      const feed = parseRSS(text, url.trim())
+      feed.items = feed.items.sort(sortByPublished)
+
+      await db.insert(feedsTable).values([{
+        id: feed.id,
+        title: feed.title ?? '',
+        feedUrl: url.trim(),
+        link: feed.link ?? '',
+      }]).run()
+
+      if (feed.items.length > 0) {
+        await db.insert(feedItemsTable).values(
+          feed.items.map(i => ({
+            id: i.id,
+            feedId: feed.id,
+            title: i.title,
+            link: i.link,
+            published: i.published ?? undefined,
+            unread: i.unread ?? true,
+          }))
+        ).run()
+      }
+
+      await hydrateFeed()
+      setUrl('')
+      hideModal()
     } catch (e) {
       setError('Failed to fetch or parse RSS feed.')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
+
   return (
     <>
       <Portal>

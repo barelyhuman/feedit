@@ -15,6 +15,9 @@ import {
 } from 'react-native-paper'
 import Share from 'react-native-share'
 import { version } from '../../package.json'
+import { nanoid } from 'nanoid'
+import { db } from '../lib/db'
+import { feeds as feedsTable } from '../lib/db/schema'
 import { useFeedStore } from '../lib/store/feed'
 import { useOpmlImportStore } from '../lib/store/opmlImportStore'
 
@@ -30,8 +33,8 @@ const SettingsPage = () => {
   const updateProgress = useOpmlImportStore(s => s.updateProgress)
   const finishImport = useOpmlImportStore(s => s.finishImport)
   const setError = useOpmlImportStore(s => s.setError)
-  const addFeed = useFeedStore(state => state.addFeed)
-  const feeds = useFeedStore(s => s.feeds)
+  const hydrateFeed = useFeedStore(s => s.hydrate)
+  const sequentialBackgroundSync = useFeedStore(s => s.sequentialBackgroundSync)
   const addToFailedItems = useOpmlImportStore(s => s.addToFailedItems)
   const failedItems = useOpmlImportStore(s => s.failedItems)
 
@@ -58,27 +61,36 @@ const SettingsPage = () => {
       startImport(outlines.length)
       let importedCount = 0
       for (const outline of outlines) {
-        const url = outline.xmlUrl
-        if (url) {
-          await addFeed(url).catch(err => {
-            console.error(err)
-            addToFailedItems(url)
-          })
+        const feedUrl = outline.xmlUrl
+        if (feedUrl) {
+          try {
+            await db.insert(feedsTable).values([{
+              id: nanoid(),
+              title: outline.text || outline.title || feedUrl,
+              feedUrl,
+              link: outline.htmlUrl || '',
+            }]).onConflictDoNothing().run()
+          } catch (_e) {
+            addToFailedItems(feedUrl)
+          }
         }
         importedCount++
         updateProgress(importedCount)
       }
+      await hydrateFeed()
       finishImport()
+      sequentialBackgroundSync()
     } catch (e: any) {
       setError(e.message || 'Failed to import OPML')
     }
   }, [
-    addFeed,
     addToFailedItems,
     startImport,
     updateProgress,
     finishImport,
     setError,
+    hydrateFeed,
+    sequentialBackgroundSync,
   ])
 
   const escapeXml = (str: string | undefined) => {
@@ -93,13 +105,14 @@ const SettingsPage = () => {
 
   const handleExportOPML = useCallback(async () => {
     try {
-      if (!feeds || feeds.length === 0) {
+      const dbFeeds = await db.select().from(feedsTable).all()
+      if (!dbFeeds.length) {
         Alert.alert('Export', 'No feeds to export')
         return
       }
 
       const headTitle = 'feedit export'
-      const outlines = feeds
+      const outlines = dbFeeds
         .map(f => {
           const title = escapeXml(f.title || '')
           const xmlUrl = escapeXml(f.feedUrl || '')
@@ -129,7 +142,7 @@ const SettingsPage = () => {
     } catch (err: any) {
       console.error('failed to share', err)
     }
-  }, [feeds])
+  }, [])
 
   return (
     <View>
@@ -225,7 +238,7 @@ const SettingsPage = () => {
 export default SettingsPage
 
 const getOutlines = (xml: any[]) => {
-  const outlines: { xmlUrl: string }[] = []
+  const outlines: { xmlUrl: string; text?: string; title?: string; htmlUrl?: string }[] = []
   xml.forEach(xmlNode => {
     const opmlNodes = xmlNode.opml || []
     opmlNodes.forEach((opmlNode: { body?: any[] }) => {
@@ -238,7 +251,7 @@ const getOutlines = (xml: any[]) => {
               return [d, bodyNode[':@'][d]]
             })
           )
-          outlines.push(outline)
+          outlines.push(outline as { xmlUrl: string; text?: string; title?: string; htmlUrl?: string })
         }
       })
     })
