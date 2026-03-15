@@ -36,6 +36,7 @@ const SettingsPage = () => {
   const hydrateFeed = useFeedStore(s => s.hydrate)
   const sequentialBackgroundSync = useFeedStore(s => s.sequentialBackgroundSync)
   const addToFailedItems = useOpmlImportStore(s => s.addToFailedItems)
+  const syncAll = useFeedStore(s => s.syncAll);
   const failedItems = useOpmlImportStore(s => s.failedItems)
 
   const handleImportOPML = useCallback(async () => {
@@ -77,6 +78,7 @@ const SettingsPage = () => {
         importedCount++
         updateProgress(importedCount)
       }
+      await syncAll()
       await hydrateFeed()
       finishImport()
       sequentialBackgroundSync()
