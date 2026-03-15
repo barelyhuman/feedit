@@ -24,7 +24,7 @@ const App = () => {
     Promise.all([hydrateFeed(), hydrateBookmarks()]).then(() => {
       sequentialBackgroundSync()
     })
-  }, [success,])
+  }, [success, hydrateFeed, hydrateBookmarks, sequentialBackgroundSync])
 
   if (error) {
     return (

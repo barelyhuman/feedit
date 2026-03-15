@@ -149,54 +149,59 @@ export const useFeedStore = create<FeedState>()((set, get) => ({
         }),
       );
       set({
-        feeds: feeds as any,
+        feeds: (feeds.filter(Boolean)) as Feed[],
       });
     } finally {
       isSyncingAll = false;
+      set(s => ({ feeds: s.feeds.map(d => ({ ...d, isLoading: false })) }));
     }
   },
   sequentialBackgroundSync: async () => {
     for (const feedItem of get().feeds) {
-      if (!feedItem.feedUrl) continue;
-      const response = await fetch(feedItem.feedUrl).then((d) => d.text());
-      const feed = parseRSS(response, feedItem.feedUrl);
+      try {
+        if (!feedItem.feedUrl) continue;
+        const response = await fetch(feedItem.feedUrl).then((d) => d.text());
+        const feed = parseRSS(response, feedItem.feedUrl);
 
-      const items = feed.items
-        .map((x) => {
-          const existingItem = feedItem.items.find((y) => y.id === x.id);
-          return Object.assign({}, existingItem, x, {
-            unread: existingItem?.unread ?? true,
-          });
-        })
-        .sort(sortByPublished);
+        const items = feed.items
+          .map((x) => {
+            const existingItem = feedItem.items.find((y) => y.id === x.id);
+            return Object.assign({}, existingItem, x, {
+              unread: existingItem?.unread ?? true,
+            });
+          })
+          .sort(sortByPublished);
 
-      await db.delete(feedItemsTable).where(eq(feedItemsTable.feedId, feedItem.id)).run();
-      if (items.length > 0) {
-        await db.insert(feedItemsTable).values(
-          items.map(item => ({
-            id: item.id,
-            feedId: feedItem.id,
-            title: item.title,
-            link: item.link,
-            published: item.published ?? undefined,
-            unread: item.unread ?? true,
-          }))
-        ).run();
+        await db.delete(feedItemsTable).where(eq(feedItemsTable.feedId, feedItem.id)).run();
+        if (items.length > 0) {
+          await db.insert(feedItemsTable).values(
+            items.map(item => ({
+              id: item.id,
+              feedId: feedItem.id,
+              title: item.title,
+              link: item.link,
+              published: item.published ?? undefined,
+              unread: item.unread ?? true,
+            }))
+          ).run();
+        }
+
+        set((state) => ({
+          feeds: state.feeds.map((existingFeed) => {
+            return existingFeed.id === feedItem.id
+              ? {
+                ...existingFeed,
+                id: feedItem.id,
+                feedUrl: feedItem.feedUrl,
+                isLoading: false,
+                items: items,
+              }
+              : existingFeed;
+          }),
+        }));
+      } catch (_e) {
+        // skip failed feed, continue with rest
       }
-
-      set((state) => ({
-        feeds: state.feeds.map((existingFeed) => {
-          return existingFeed.id === feedItem.id
-            ? {
-              ...existingFeed,
-              id: feedItem.id,
-              feedUrl: feedItem.feedUrl,
-              isLoading: false,
-              items: items,
-            }
-            : existingFeed;
-        }),
-      }));
     }
   },
   syncFeed: async (id) => {
@@ -241,7 +246,7 @@ export const useFeedStore = create<FeedState>()((set, get) => ({
             feedId: id,
             title: item.title,
             link: item.link,
-            published: item.published ?? undefined,
+            published: new Date(item.published).toISOString() ?? undefined,
             unread: item.unread ?? true,
           }))
         ).run();
@@ -251,14 +256,26 @@ export const useFeedStore = create<FeedState>()((set, get) => ({
         feeds: state.feeds.map((f) =>
           f.id === id
             ? {
-              ...currentFeed,
+              ...f,
               items: mergedItems,
               isLoading: false,
             }
             : f
         ) as Feed[],
       }));
+    } catch (err) {
+      console.error(err);
     } finally {
+      set((state) => ({
+        feeds: state.feeds.map((f) =>
+          f.id === id
+            ? {
+              ...f,
+              isLoading: false,
+            }
+            : f
+        ) as Feed[],
+      }));
       syncingFeeds.delete(id);
     }
   },

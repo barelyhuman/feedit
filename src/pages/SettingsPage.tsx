@@ -244,7 +244,7 @@ const getOutlines = (xml: any[]) => {
     opmlNodes.forEach((opmlNode: { body?: any[] }) => {
       const body = opmlNode.body || []
       body.forEach(bodyNode => {
-        if ('outline' in bodyNode) {
+        if ('outline' in bodyNode && bodyNode[':@']) {
           const allAttrKeys = Object.keys(bodyNode[':@'])
           const outline = Object.fromEntries(
             allAttrKeys.map(d => {

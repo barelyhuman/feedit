@@ -5734,7 +5734,9 @@ __metadata:
     drizzle-orm: "npm:^0.45.1"
     eslint: "npm:^8.19.0"
     fast-xml-parser: "npm:^5.2.5"
+    husky: "npm:^9.1.7"
     jest: "npm:^29.6.3"
+    nano-staged: "npm:^0.9.0"
     nanoid: "npm:^5.1.5"
     patch-package: "npm:^8.0.0"
     prettier: "npm:^3.6.2"
@@ -6292,6 +6294,15 @@ __metadata:
   version: 2.1.0
   resolution: "human-signals@npm:2.1.0"
   checksum: 10c0/695edb3edfcfe9c8b52a76926cd31b36978782062c0ed9b1192b36bebc75c4c87c82e178dfcb0ed0fc27ca59d434198aac0bd0be18f5781ded775604db22304a
+  languageName: node
+  linkType: hard
+
+"husky@npm:^9.1.7":
+  version: 9.1.7
+  resolution: "husky@npm:9.1.7"
+  bin:
+    husky: bin.js
+  checksum: 10c0/35bb110a71086c48906aa7cd3ed4913fb913823715359d65e32e0b964cb1e255593b0ae8014a5005c66a68e6fa66c38dcfa8056dbbdfb8b0187c0ffe7ee3a58f
   languageName: node
   linkType: hard
 
@@ -8138,6 +8149,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nano-staged@npm:^0.9.0":
+  version: 0.9.0
+  resolution: "nano-staged@npm:0.9.0"
+  dependencies:
+    picocolors: "npm:^1.0.0"
+  bin:
+    nano-staged: lib/bin.js
+  checksum: 10c0/7052f159e1c0ce5c4d65df3a17288bd099779819fe13fa658bdd10c0eb41b0094ffa9391d84bd3774f9bcfd41fa5e5f82f0d7cb6f69c2e04d4580cf7f6d7b3f2
+  languageName: node
+  linkType: hard
+
 "nanoid@npm:^3.3.11":
   version: 3.3.11
   resolution: "nanoid@npm:3.3.11"
@@ -8663,7 +8685,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"picocolors@npm:^1.1.1":
+"picocolors@npm:^1.0.0, picocolors@npm:^1.1.1":
   version: 1.1.1
   resolution: "picocolors@npm:1.1.1"
   checksum: 10c0/e2e3e8170ab9d7c7421969adaa7e1b31434f789afb9b3f115f6b96d91945041ac3ceb02e9ec6fe6510ff036bcc0bf91e69a1772edc0b707e12b19c0f2d6bcf58
