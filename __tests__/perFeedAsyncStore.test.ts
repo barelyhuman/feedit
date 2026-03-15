@@ -118,6 +118,23 @@ describe('setItem', () => {
     const itemsStr = await AsyncStorage.getItem('feedit-items-noitems')
     expect(JSON.parse(itemsStr!)).toEqual([])
   })
+
+  it('ignores null/undefined entries in the feeds array (from syncAll undefined returns)', async () => {
+    // syncAll returns undefined for feeds without a feedUrl; JSON.stringify
+    // converts those to null.  setItem must skip them and not throw.
+    const valueWithNulls = JSON.stringify({
+      state: {
+        feeds: [sampleFeed('valid1'), null, sampleFeed('valid2'), null],
+      },
+      version: 0,
+    })
+    await perFeedAsyncStore.setItem('feedit', valueWithNulls)
+
+    const indexStr = await AsyncStorage.getItem('feedit-feed-index')
+    expect(JSON.parse(indexStr!)).toEqual(['valid1', 'valid2'])
+    expect(await AsyncStorage.getItem('feedit-feed-valid1')).not.toBeNull()
+    expect(await AsyncStorage.getItem('feedit-feed-valid2')).not.toBeNull()
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -189,6 +206,30 @@ describe('getItem', () => {
       // New per-feed keys should now exist.
       const indexStr = await AsyncStorage.getItem('feedit-feed-index')
       expect(JSON.parse(indexStr!)).toEqual(['leg1'])
+    })
+
+    it('retains legacy data when the migration write fails to produce an index', async () => {
+      // Simulate a scenario where setItem encounters an error before writing
+      // the index (e.g. storage is full).  The legacy data must NOT be removed
+      // so the user still has their feeds on the next app start.
+      const legacyFeeds = [sampleFeed('safe1')]
+      const legacyValue = makeZustandValue(legacyFeeds)
+      ;(chunkAsyncStore.getItem as jest.Mock).mockResolvedValueOnce(legacyValue)
+
+      // Make ALL multiSet calls fail so the index is never written.
+      const multiSetSpy = jest
+        .spyOn(AsyncStorage, 'multiSet')
+        .mockRejectedValue(new Error('Storage full'))
+
+      const result = await perFeedAsyncStore.getItem('feedit')
+
+      // Still returns the legacy data for this session.
+      expect(result).toBe(legacyValue)
+
+      // Legacy key must NOT have been removed because the index wasn't written.
+      expect(chunkAsyncStore.removeItem).not.toHaveBeenCalled()
+
+      multiSetSpy.mockRestore()
     })
 
     it('returns null when no index and no legacy data exist', async () => {
